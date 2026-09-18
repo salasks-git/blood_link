@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>LifeLink Admin Console</title>
+  <meta name="description" content="LifeLink Admin Panel - Manage donors, hospitals, users and audit logs."/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{secondary:"#565e74","on-secondary-fixed-variant":"#3f465c",primary:"#b70011","on-tertiary":"#ffffff","on-tertiary-fixed":"#001d31","surface-variant":"#d3e4fe","on-secondary":"#ffffff","outline-variant":"#e6bdb8","surface-container-lowest":"#ffffff","surface-container-low":"#eff4ff","surface-dim":"#cbdbf5","surface-tint":"#bf0715","primary-fixed":"#ffdad6",error:"#ba1a1a","on-primary-fixed":"#410002","on-primary-container":"#fff6f5","on-primary":"#ffffff","primary-container":"#dc2626","on-secondary-container":"#5c647a",outline:"#916f6b",background:"#f8f9ff","secondary-fixed-dim":"#bec6e0","secondary-container":"#dae2fd",surface:"#f8f9ff","inverse-surface":"#213145","secondary-fixed":"#dae2fd","tertiary-fixed":"#cce5ff","error-container":"#ffdad6","on-surface-variant":"#5c403c","inverse-on-surface":"#eaf1ff","primary-fixed-dim":"#ffb4ab","surface-container-highest":"#d3e4fe","on-primary-fixed-variant":"#93000b","inverse-primary":"#ffb4ab","on-secondary-fixed":"#131b2e","on-error":"#ffffff","surface-bright":"#f8f9ff","surface-container":"#e5eeff","tertiary-fixed-dim":"#93ccff","on-tertiary-container":"#f5f8ff",tertiary:"#005e90","on-tertiary-fixed-variant":"#004b73","tertiary-container":"#0078b6","on-surface":"#0b1c30","surface-container-high":"#dce9ff","on-error-container":"#93000a","on-background":"#0b1c30"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-md":"0.75rem","gutter-desktop":"1.5rem","space-xs":"0.25rem",gutter:"1rem","space-xl":"1.5rem","margin-desktop":"2rem",margin:"1rem","space-sm":"0.5rem","space-lg":"1rem"},fontFamily:{"headline-sm":["Inter"],"headline-xl":["Inter"],"body-sm":["Inter"],"label-md":["Inter"],"code-sm":["JetBrains Mono"],"headline-lg":["Inter"],"label-sm":["Inter"],"body-md":["Inter"],"body-lg":["Inter"]},fontSize:{"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],"headline-xl":["24px",{lineHeight:"32px",letterSpacing:"-0.02em",fontWeight:"600"}],"body-sm":["12px",{lineHeight:"16px",letterSpacing:"0em",fontWeight:"400"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"500"}],"code-sm":["12px",{lineHeight:"16px",letterSpacing:"0em",fontWeight:"400"}],"headline-lg":["20px",{lineHeight:"28px",letterSpacing:"-0.015em",fontWeight:"600"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.04em",fontWeight:"600"}],"body-md":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"400"}],"body-lg":["15px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}]}}}}</script>
+  <style>
+    @layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;font-family:'Inter',sans-serif;}}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#dce9ff;border-radius:4px}
+    .page{display:none}.page.active{display:block}
+    #login-page{display:flex}
+    .nav-link.active{background-color:#eff4ff;color:#b70011;font-weight:500;border-right:2px solid #b70011}
+    .fade-in{animation:fadeIn 0.2s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .stat-card:hover{box-shadow:0 2px 12px rgba(183,0,17,.08);transform:translateY(-1px);transition:all .2s}
+  </style>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased">
+
+<!-- LOGIN PAGE -->
+<div id="login-page" class="min-h-screen bg-background flex items-center justify-center p-gutter page active">
+  <main class="w-full max-w-md">
+    <div class="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-space-xl shadow-sm">
+      <div class="flex items-center justify-between pb-space-md mb-space-lg border-b border-surface-container-high">
+        <div class="flex items-center gap-space-xs font-code-sm text-code-sm">
+          <span class="inline-block w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+          <span class="tracking-tight text-on-surface">SYS.GATEWAY // AUTH-01</span>
+        </div>
+        <span class="font-code-sm text-code-sm text-secondary tracking-widest uppercase">NODE: US-EAST</span>
+      </div>
+      <div class="flex flex-col items-start gap-space-xs mb-space-lg">
+        <div class="flex items-center gap-space-sm mb-space-xs">
+          <div class="w-7 h-7 bg-primary-container text-on-primary flex items-center justify-center rounded-lg">
+            <span class="material-symbols-outlined text-headline-sm" style="font-variation-settings:'FILL' 1">emergency</span>
+          </div>
+          <span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">LifeLink<span class="text-primary-container">.Admin</span></span>
+        </div>
+        <h1 class="font-headline-xl text-headline-xl text-on-surface">Sign In</h1>
+        <p class="font-body-md text-body-md text-secondary">Access LifeLink Admin Console</p>
+      </div>
+      <form class="flex flex-col gap-space-md" id="loginForm" onsubmit="event.preventDefault();triggerAuth()">
+        <div class="flex flex-col gap-space-xs">
+          <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary flex items-center justify-between" for="adminUsername">
+            <span>Username</span><span class="font-code-sm text-code-sm text-secondary/60">ID: GADMIN</span>
+          </label>
+          <input class="w-full h-9 bg-surface-container-lowest border border-surface-container-high rounded px-space-sm font-body-md text-body-md text-on-surface placeholder:text-secondary/50 focus:outline-none focus:border-on-surface transition-colors" id="adminUsername" placeholder="Enter username" required type="text" value="admin"/>
+        </div>
+        <div class="flex flex-col gap-space-xs">
+          <label class="font-label-sm text-label-sm uppercase tracking-wider text-secondary flex items-center justify-between" for="adminPassword">
+            <span>Password</span><span class="font-code-sm text-code-sm text-secondary/60">SEC: LEVEL-4</span>
+          </label>
+          <div class="relative flex items-center">
+            <input class="w-full h-9 bg-surface-container-lowest border border-surface-container-high rounded px-space-sm pr-9 font-body-md text-body-md text-on-surface placeholder:text-secondary/50 focus:outline-none focus:border-on-surface transition-colors" id="adminPassword" placeholder="..." required type="password" value="admin123"/>
+            <button aria-label="Toggle visibility" class="absolute right-2 text-secondary hover:text-on-surface flex items-center justify-center p-1" id="togglePassword" type="button">
+              <span class="material-symbols-outlined text-body-lg" id="pwdIcon">visibility</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-space-xs">
+          <label class="flex items-center gap-space-sm cursor-pointer select-none">
+            <input class="w-4 h-4 rounded-DEFAULT border border-surface-container-high accent-on-surface cursor-pointer" checked type="checkbox"/>
+            <span class="font-body-sm text-body-sm text-secondary">Remember me</span>
+          </label>
+          <a class="font-body-sm text-body-sm text-secondary hover:text-primary-container transition-colors" href="#">Forgot password?</a>
+        </div>
+        <div class="pt-space-xs">
+          <button class="w-full h-9 bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded flex items-center justify-center gap-space-xs transition-colors" id="submitBtn" type="submit">
+            <span id="btnText">Login</span>
+            <span class="material-symbols-outlined text-body-md">arrow_forward</span>
+          </button>
+        </div>
+      </form>
+      <div class="mt-space-lg pt-space-md border-t border-surface-container-high flex flex-col gap-space-xs text-center">
+        <div class="flex items-center justify-center gap-space-xs font-code-sm text-code-sm text-secondary">
+          <span class="material-symbols-outlined text-body-sm">lock</span>
+          <span>LifeLink Admin Panel v1.0 - Authorized Personnel Only</span>
+        </div>
+        <p class="font-code-sm text-code-sm text-secondary/60">UNAUTHORIZED ACCESS ATTEMPTS ARE LOGGED AND TRACED</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- DASHBOARD SHELL -->
+<div id="dashboard-shell" class="hidden">
+  <aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-lowest border-r border-surface-container-high z-50 flex flex-col justify-between">
+    <div class="flex flex-col">
+      <div class="h-12 px-gutter border-b border-surface-container-high flex items-center gap-space-sm">
+        <div class="w-7 h-7 bg-primary-container text-on-primary flex items-center justify-center rounded-lg shrink-0">
+          <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">emergency</span>
+        </div>
+        <span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">LifeLink Admin</span>
+      </div>
+      <div class="px-gutter pt-space-md pb-space-xs">
+        <span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Navigation</span>
+      </div>
+      <nav class="flex flex-col space-y-0.5 px-space-xs">
+        <a class="nav-link active flex items-center gap-space-sm px-space-md py-space-sm transition-colors rounded-DEFAULT font-body-md text-body-md cursor-pointer" data-page="overview"><span class="material-symbols-outlined text-[18px]">grid_view</span><span>Overview</span></a>
+        <a class="nav-link flex items-center gap-space-sm px-space-md py-space-sm text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md rounded-DEFAULT cursor-pointer" data-page="hospitals"><span class="material-symbols-outlined text-[18px]">local_hospital</span><span>Hospitals</span></a>
+        <a class="nav-link flex items-center gap-space-sm px-space-md py-space-sm text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md rounded-DEFAULT cursor-pointer" data-page="users"><span class="material-symbols-outlined text-[18px]">group</span><span>Users</span></a>
+        <a class="nav-link flex items-center gap-space-sm px-space-md py-space-sm text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors font-body-md text-body-md rounded-DEFAULT cursor-pointer" data-page="audit"><span class="material-symbols-outlined text-[18px]">description</span><span>Audit Log</span></a>
+      </nav>
+    </div>
+    <div class="p-space-md border-t border-surface-container-high">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-space-sm min-w-0">
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div>
+          <div class="min-w-0 flex flex-col"><span class="font-label-md text-label-md text-on-surface truncate">Admin User</span><span class="font-label-sm text-label-sm text-secondary truncate">Superadmin</span></div>
+        </div>
+        <button class="p-space-xs text-secondary hover:text-primary transition-colors" onclick="signOut()" title="Sign Out"><span class="material-symbols-outlined text-[20px]">logout</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="pl-60">
+    <header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-lowest border-b border-surface-container-high z-40 flex items-center justify-between px-gutter-desktop">
+      <div class="flex items-center gap-space-sm">
+        <span class="font-body-sm text-body-sm text-secondary">Portal</span>
+        <span class="font-body-sm text-body-sm text-secondary">/</span>
+        <span class="font-body-sm text-body-sm text-on-surface font-medium" id="breadcrumb">Management Console</span>
+      </div>
+      <div class="flex items-center gap-space-md">
+        <div class="flex items-center gap-space-xs bg-surface-container-low border border-surface-container px-space-sm py-0.5 rounded-DEFAULT">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          <span class="font-label-sm text-label-sm text-secondary uppercase">System Active</span>
+        </div>
+        <div class="w-px h-4 bg-surface-container-high"></div>
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer" onclick="navigateTo('overview')"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div>
+      </div>
+    </header>
+
+    <main class="pt-12 min-h-screen bg-background">
+
+      <!-- OVERVIEW -->
+      <div id="page-overview" class="page active fade-in">
+        <div class="px-gutter-desktop py-space-xl flex flex-col gap-space-xl">
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md border-b border-surface-container-high pb-space-lg">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-space-xs text-secondary font-label-sm uppercase tracking-wider mb-1"><span>Operational Dashboard</span><span>•</span><span class="text-primary font-semibold">Live Feed</span></div>
+              <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Overview</h1>
+              <p class="font-body-md text-body-md text-secondary mt-0.5">Key operational metrics and system status summary</p>
+            </div>
+            <div class="flex items-center gap-space-sm flex-wrap">
+              <button class="h-8 px-space-md bg-surface-container-lowest border border-surface-container-high hover:border-secondary text-on-surface font-label-md text-label-md rounded-DEFAULT flex items-center gap-space-xs transition-colors" onclick="navigateTo('audit')" type="button"><span class="material-symbols-outlined text-[16px] text-secondary">history</span><span>View Audit Log</span></button>
+              <button class="h-8 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded-DEFAULT flex items-center gap-space-xs transition-colors" onclick="navigateTo('hospitals')" type="button"><span class="material-symbols-outlined text-[16px]">add_circle</span><span>Add Hospital</span></button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-desktop">
+            <div class="stat-card bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT p-space-lg flex flex-col justify-between">
+              <div class="flex items-center justify-between pb-space-sm"><span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Total Requests</span><span class="material-symbols-outlined text-secondary text-[18px]">bloodtype</span></div>
+              <div class="my-space-xs flex items-baseline gap-space-sm"><span class="font-headline-xl text-headline-xl text-on-surface font-semibold" id="stat-total-requests">-</span><span class="font-label-sm text-label-sm text-primary font-medium">Live</span></div>
+              <div class="pt-space-xs border-t border-surface-container-high/60"><span class="font-body-sm text-body-sm text-secondary">All time blood requests</span></div>
+            </div>
+            <div class="stat-card bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT p-space-lg flex flex-col justify-between">
+              <div class="flex items-center justify-between pb-space-sm"><span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Registered Donors</span><span class="material-symbols-outlined text-secondary text-[18px]">volunteer_activism</span></div>
+              <div class="my-space-xs flex items-baseline gap-space-sm"><span class="font-headline-xl text-headline-xl text-on-surface font-semibold" id="stat-donors">-</span><span class="font-code-sm text-code-sm text-secondary">ACTIVE</span></div>
+              <div class="pt-space-xs border-t border-surface-container-high/60"><span class="font-body-sm text-body-sm text-secondary" id="stat-donors-bg">By blood group</span></div>
+            </div>
+            <div class="stat-card bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT p-space-lg flex flex-col justify-between">
+              <div class="flex items-center justify-between pb-space-sm"><span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Total Users</span><span class="material-symbols-outlined text-secondary text-[18px]">group</span></div>
+              <div class="my-space-xs flex items-baseline gap-space-sm"><span class="font-headline-xl text-headline-xl text-on-surface font-semibold" id="stat-users">-</span><span class="font-label-sm text-label-sm text-tertiary font-medium">Total</span></div>
+              <div class="pt-space-xs border-t border-surface-container-high/60"><span class="font-body-sm text-body-sm text-secondary">Donors + Receivers</span></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter-desktop items-start">
+            <div class="lg:col-span-2 bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT flex flex-col">
+              <div class="p-space-md border-b border-surface-container-high flex items-center justify-between">
+                <div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-secondary text-[18px]">reorder</span><h2 class="font-headline-sm text-headline-sm text-on-surface">Recent Blood Requests</h2></div>
+                <span class="font-code-sm text-code-sm text-secondary">REAL-TIME</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left">
+                  <thead><tr class="bg-surface-container-low border-b border-surface-container-high">
+                    <th class="py-space-xs px-space-md font-label-sm text-label-sm text-secondary uppercase">Time</th>
+                    <th class="py-space-xs px-space-md font-label-sm text-label-sm text-secondary uppercase">Hospital</th>
+                    <th class="py-space-xs px-space-md font-label-sm text-label-sm text-secondary uppercase">Blood</th>
+                    <th class="py-space-xs px-space-md font-label-sm text-label-sm text-secondary uppercase">Status</th>
+                    <th class="py-space-xs px-space-md font-label-sm text-label-sm text-secondary uppercase">Units</th>
+                  </tr></thead>
+                  <tbody class="divide-y divide-surface-container-high font-body-md text-body-md" id="recent-requests-body">
+                    <tr><td colspan="5" class="py-4 px-space-md text-center text-secondary font-body-sm">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="p-space-sm px-space-md border-t border-surface-container-high bg-surface-container-low/40 flex items-center justify-between">
+                <span class="font-body-sm text-body-sm text-secondary" id="overview-count">Loading...</span>
+                <button class="font-label-sm text-label-sm text-primary hover:underline font-medium flex items-center gap-0.5" onclick="navigateTo('audit')"><span>View Full Audit Register</span><span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+              </div>
+            </div>
+            <div class="flex flex-col gap-space-lg">
+              <div class="bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT p-space-md flex flex-col">
+                <div class="border-b border-surface-container-high pb-space-sm mb-space-sm flex items-center justify-between"><span class="font-headline-sm text-headline-sm text-on-surface">Network Status</span><span class="font-code-sm text-code-sm text-primary font-medium">99.98% SLA</span></div>
+                <div class="flex flex-col space-y-space-sm font-body-sm text-body-sm">
+                  <div class="flex items-center justify-between py-1 border-b border-surface-container-high/50"><span class="text-secondary">Dispatch Gateway</span><span class="font-label-sm text-label-sm text-on-surface flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>OPERATIONAL</span></div>
+                  <div class="flex items-center justify-between py-1 border-b border-surface-container-high/50"><span class="text-secondary">Backend API</span><span class="font-label-sm text-label-sm text-on-surface flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>SYNCHRONIZED</span></div>
+                  <div class="flex items-center justify-between py-1 border-b border-surface-container-high/50"><span class="text-secondary">Donor Matching</span><span class="font-label-sm text-label-sm text-primary font-medium flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>ACTIVE</span></div>
+                  <div class="flex items-center justify-between py-1"><span class="text-secondary">SQLite Database</span><span class="font-label-sm text-label-sm text-on-surface flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>NOMINAL</span></div>
+                </div>
+              </div>
+              <div class="bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT p-space-md flex flex-col justify-between">
+                <div class="flex items-start gap-space-sm"><span class="material-symbols-outlined text-primary text-[20px] mt-0.5">priority_high</span><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold">Triage Protocol Active</span><p class="font-body-sm text-body-sm text-secondary mt-1">Blood request broadcast active. Donors matched by blood group in real-time.</p></div></div>
+                <div class="mt-space-md pt-space-sm border-t border-surface-container-high flex items-center justify-between"><span class="font-code-sm text-code-sm text-secondary">NODE-CLUSTER: LOCAL-01</span><button class="font-label-sm text-label-sm text-primary hover:underline font-medium" onclick="navigateTo('users')">View Users</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOSPITALS -->
+      <div id="page-hospitals" class="page">
+        <div class="p-gutter-desktop space-y-space-lg">
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+            <div><div class="flex items-center gap-space-xs text-secondary font-code-sm text-code-sm mb-1"><span>FACILITY_DIR</span><span>/</span><span class="text-on-surface">V4.8.2</span></div>
+              <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Hospital Management</h1>
+              <p class="font-body-md text-body-md text-secondary mt-0.5">Review, verify, and manage registered medical facilities.</p></div>
+            <div class="flex items-center gap-space-sm">
+              <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-DEFAULT flex items-center gap-space-md border border-surface-container-high">
+                <div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Pending Review</div><div class="font-headline-lg text-headline-lg text-primary leading-none mt-0.5">0</div></div>
+                <div class="w-px h-6 bg-surface-container-high"></div>
+                <div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Active Hubs</div><div class="font-headline-lg text-headline-lg text-on-surface leading-none mt-0.5">0</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-DEFAULT flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md border border-surface-container-high">
+            <div class="flex flex-1 items-center gap-space-sm">
+              <div class="relative flex-1 max-w-sm">
+                <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-secondary text-[18px]">search</span>
+                <input class="w-full bg-surface-container-lowest text-on-surface placeholder:text-secondary font-body-sm text-body-sm pl-8 pr-space-md py-1.5 rounded-DEFAULT focus:outline-none focus:ring-1 focus:ring-on-surface border border-surface-container-high" id="hospital-search" oninput="filterHospitals()" placeholder="Search hospitals..." type="text"/>
+              </div>
+              <div class="relative">
+                <select class="bg-surface-container-lowest text-on-surface font-body-sm text-body-sm pl-space-md pr-8 py-1.5 rounded-DEFAULT appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-on-surface border border-surface-container-high" id="hospital-filter" onchange="filterHospitals()">
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending Review</option>
+                  <option value="verified">Verified</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-[16px]">expand_more</span>
+              </div>
+            </div>
+            <button class="bg-primary text-on-primary hover:bg-primary-container px-space-md py-1.5 rounded-DEFAULT font-label-md text-label-md flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[16px]">add_business</span><span>Register New Hospital</span></button>
+          </div>
+          <div class="bg-surface-container-lowest rounded-DEFAULT overflow-hidden border border-surface-container-high">
+            <div class="px-space-md py-space-xs bg-surface-container-low flex items-center justify-between">
+              <div class="flex items-center gap-space-md text-secondary font-label-sm text-label-sm uppercase tracking-wider"><span>Active Registry: <strong class="text-on-surface font-code-sm">US-MED-ALL</strong></span><span class="w-1 h-1 rounded-full bg-secondary"></span><span>Tier-1 Priority Enabled</span></div>
+              <span class="font-code-sm text-code-sm text-secondary">BATCH_SYNC: OK</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead><tr class="bg-surface-container-low font-label-sm text-label-sm text-secondary uppercase tracking-wider">
+                  <th class="py-space-sm px-space-md">Facility &amp; Location</th>
+                  <th class="py-space-sm px-space-md">Contact</th>
+                  <th class="py-space-sm px-space-md">Status</th>
+                  <th class="py-space-sm px-space-md">Transit</th>
+                  <th class="py-space-sm px-space-md text-right">Actions</th>
+                </tr></thead>
+                <tbody class="text-on-surface font-body-md text-body-md" id="hosp-tbody">
+                  <tr><td colspan="5" class="py-6 px-space-md text-center text-secondary font-body-sm">No hospitals currently registered in the database</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="px-space-md py-space-sm bg-surface-container-low flex items-center justify-between"><span class="font-body-sm text-body-sm text-secondary">Showing 0 of 0 registered medical facilities</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div id="page-users" class="page">
+        <div class="flex flex-col w-full px-gutter-desktop py-space-xl">
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md mb-space-lg">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-space-xs text-secondary font-label-sm uppercase tracking-wider mb-0.5"><span>Administration</span><span>-</span><span>Identity &amp; Access</span></div>
+              <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Users</h1>
+              <p class="font-body-md text-body-md text-secondary mt-0.5">Manage user accounts, donor roles, and access permissions.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md mb-space-lg">
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between border border-surface-container-high">
+              <div class="flex items-center justify-between"><span class="font-label-sm text-secondary uppercase tracking-wider">Total Enrolled</span><span class="material-symbols-outlined text-[18px] text-secondary">groups</span></div>
+              <div class="mt-space-sm flex items-baseline gap-space-xs"><span class="font-headline-xl text-headline-xl text-on-surface font-semibold" id="users-total">-</span></div>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between border border-surface-container-high">
+              <div class="flex items-center justify-between"><span class="font-label-sm text-secondary uppercase tracking-wider">Donors</span><span class="material-symbols-outlined text-[18px] text-primary">volunteer_activism</span></div>
+              <div class="mt-space-sm flex items-baseline gap-space-xs"><span class="font-headline-xl text-headline-xl text-on-surface font-semibold" id="users-donors">-</span></div>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between border border-surface-container-high">
+              <div class="flex items-center justify-between"><span class="font-label-sm text-secondary uppercase tracking-wider">Receivers</span><span class="material-symbols-outlined text-[18px] text-tertiary">local_hospital</span></div>
+              <div class="mt-space-sm flex items-baseline gap-space-xs"><span class="font-headline-xl text-headline-xl text-on-surface font-semibold" id="users-receivers">-</span></div>
+            </div>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col border border-surface-container-high">
+            <div class="p-space-md flex flex-col lg:flex-row lg:items-center justify-between gap-space-md border-b border-surface-container-high">
+              <div class="flex items-center flex-wrap gap-1 p-0.5 bg-surface-container-low rounded-lg" id="user-tabs">
+                <button class="px-space-md py-1 font-label-md text-label-md rounded-DEFAULT bg-surface-container-lowest text-on-surface shadow-sm tab-btn" data-filter="all">All</button>
+                <button class="px-space-md py-1 font-label-md text-label-md rounded-DEFAULT text-secondary hover:text-on-surface tab-btn" data-filter="donor">Donors</button>
+                <button class="px-space-md py-1 font-label-md text-label-md rounded-DEFAULT text-secondary hover:text-on-surface tab-btn" data-filter="receiver">Receivers</button>
+              </div>
+              <div class="relative flex-1 lg:max-w-xs">
+                <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-secondary">search</span>
+                <input class="w-full bg-surface-container-low text-on-surface placeholder:text-secondary font-body-sm text-body-sm pl-8 pr-3 py-1.5 rounded-lg outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-on-surface" id="user-search" placeholder="Search by name or phone..." type="text"/>
+              </div>
+            </div>
+            <div class="w-full overflow-x-auto">
+              <table class="w-full text-left font-body-md text-body-md min-w-[600px]">
+                <thead><tr class="bg-surface-container-low text-secondary uppercase font-label-sm text-label-sm tracking-wider">
+                  <th class="py-space-sm px-space-md">User</th>
+                  <th class="py-space-sm px-space-md">Phone</th>
+                  <th class="py-space-sm px-space-md">Role</th>
+                  <th class="py-space-sm px-space-md">Blood Group</th>
+                  <th class="py-space-sm px-space-md">Joined</th>
+                </tr></thead>
+                <tbody id="users-tbody"><tr><td colspan="5" class="py-6 px-space-md text-center text-secondary font-body-sm">Loading users...</td></tr></tbody>
+              </table>
+            </div>
+            <div class="p-space-md flex items-center justify-between border-t border-surface-container-high">
+              <span class="font-body-sm text-body-sm text-secondary" id="users-label">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIT LOG -->
+      <div id="page-audit" class="page">
+        <div class="p-gutter-desktop space-y-space-md">
+          <div class="flex flex-col gap-space-xs">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-space-sm"><h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Audit Log</h1><span class="inline-flex items-center px-space-xs py-0.5 rounded-DEFAULT bg-surface-container-high text-secondary font-code-sm text-code-sm">LEDGER::IMMUTABLE</span></div>
+              <div class="flex items-center gap-space-xs text-secondary font-code-sm text-code-sm"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span><span>LIVE RECORD</span></div>
+            </div>
+            <p class="font-body-md text-body-md text-secondary">Immutable record of system activities, blood requests, and user actions.</p>
+          </div>
+          <div class="bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT p-space-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-sm">
+            <div class="flex flex-1 items-center gap-space-sm min-w-0">
+              <div class="relative flex-1 max-w-md">
+                <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-secondary text-[16px] pointer-events-none">search</span>
+                <input class="w-full h-8 pl-8 pr-3 bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT font-body-sm text-body-sm text-on-surface placeholder:text-secondary focus:outline-none focus:border-on-surface" id="audit-search" placeholder="Filter events by keyword..." type="text"/>
+              </div>
+              <select class="h-8 px-2 bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT font-label-sm text-label-sm text-secondary focus:outline-none" id="audit-filter">
+                <option value="all">All Actions</option>
+                <option value="searching">Blood Requests</option>
+                <option value="accepted">Accepted</option>
+              </select>
+            </div>
+            <button class="h-8 px-3 inline-flex items-center gap-1.5 bg-surface-container-lowest border border-surface-container-high hover:bg-surface-container-low text-on-surface font-label-md text-label-md rounded-DEFAULT transition-colors" onclick="loadAudit()" type="button"><span class="material-symbols-outlined text-[16px] text-secondary">refresh</span><span>Refresh</span></button>
+          </div>
+          <div class="bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead><tr class="bg-surface-container-low border-b border-surface-container-high text-secondary font-label-sm text-label-sm tracking-wider uppercase">
+                  <th class="py-2.5 px-space-md w-[200px] font-semibold">Timestamp</th>
+                  <th class="py-2.5 px-space-md w-[200px] font-semibold">Action</th>
+                  <th class="py-2.5 px-space-md font-semibold">Details</th>
+                  <th class="py-2.5 px-space-md w-[120px] font-semibold">Status</th>
+                </tr></thead>
+                <tbody class="divide-y divide-surface-container-high font-body-sm text-body-sm text-on-surface" id="audit-tbody"><tr><td colspan="4" class="py-6 px-space-md text-center text-secondary">Loading audit records...</td></tr></tbody>
+              </table>
+            </div>
+            <div class="bg-surface-container-low/50 border-t border-surface-container-high px-space-md py-space-sm flex items-center justify-between font-label-md text-label-md text-secondary">
+              <span id="audit-label">Loading...</span><span class="font-code-sm text-code-sm text-secondary">Latency: 8ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+const API='http://localhost:5001/api';
+let allUsers=[],auditData=[];
+let userFilter='all';
+
+// AUTH
+document.getElementById('togglePassword').addEventListener('click',()=>{
+  const p=document.getElementById('adminPassword');
+  const i=document.getElementById('pwdIcon');
+  p.type=p.type==='password'?'text':'password';
+  i.textContent=p.type==='password'?'visibility':'visibility_off';
+});
+
+function triggerAuth(){
+  const btn=document.getElementById('submitBtn');
+  const t=document.getElementById('btnText');
+  btn.disabled=true;t.textContent='Verifying Credentials...';
+  setTimeout(()=>{
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('dashboard-shell').classList.remove('hidden');
+    navigateTo('overview');
+    loadAll();
+    btn.disabled=false;t.textContent='Login';
+  },900);
+}
+
+function signOut(){
+  document.getElementById('dashboard-shell').classList.add('hidden');
+  document.getElementById('login-page').style.display='flex';
+}
+
+// NAVIGATION
+function navigateTo(page){
+  document.querySelectorAll('.nav-link').forEach(l=>{
+    l.classList.remove('active');
+    l.classList.add('text-secondary','hover:bg-surface-container-low','hover:text-on-surface');
+  });
+  const active=document.querySelector('.nav-link[data-page="'+page+'"]');
+  if(active){active.classList.add('active');active.classList.remove('text-secondary','hover:bg-surface-container-low','hover:text-on-surface');}
+  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active','fade-in');p.style.display='none';});
+  const pg=document.getElementById('page-'+page);
+  if(pg){pg.style.display='block';pg.classList.add('active','fade-in');}
+  const names={overview:'Overview',hospitals:'Hospital Management',users:'Users',audit:'Audit Log'};
+  document.getElementById('breadcrumb').textContent=names[page]||'Management Console';
+}
+document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>navigateTo(l.dataset.page)));
+
+// LOAD ALL
+async function loadAll(){
+  await Promise.all([loadOverview(),loadUsers(),loadAudit()]);
+}
+
+// OVERVIEW
+async function loadOverview(){
+  try{
+    const[rRes,dRes]=await Promise.all([fetch(API+'/requests'),fetch(API+'/donors')]);
+    const requests=rRes.ok?await rRes.json():[];
+    const donors=dRes.ok?await dRes.json():[];
+    document.getElementById('stat-total-requests').textContent=requests.length;
+    document.getElementById('stat-donors').textContent=donors.length;
+    const uids=new Set([...requests.map(r=>r.userId),...donors.map(d=>d.userId)]);
+    document.getElementById('stat-users').textContent=uids.size;
+    const bg={};donors.forEach(d=>{bg[d.bloodGroup]=(bg[d.bloodGroup]||0)+1;});
+    document.getElementById('stat-donors-bg').textContent=Object.entries(bg).map(([g,c])=>g+': '+c).join(', ')||'No donors yet';
+    const tbody=document.getElementById('recent-requests-body');
+    if(!requests.length){tbody.innerHTML='<tr><td colspan="5" class="py-4 px-space-md text-center text-secondary font-body-sm">No requests yet</td></tr>';return;}
+    tbody.innerHTML=requests.slice(0,8).map(r=>`
+      <tr class="hover:bg-surface-container-low transition-colors">
+        <td class="py-space-sm px-space-md font-code-sm text-code-sm text-secondary whitespace-nowrap">${new Date(r.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
+        <td class="py-space-sm px-space-md font-medium text-on-surface whitespace-nowrap">${r.hospital||'-'}</td>
+        <td class="py-space-sm px-space-md"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-primary-fixed text-on-primary-fixed-variant">${r.bloodGroup}</span></td>
+        <td class="py-space-sm px-space-md whitespace-nowrap"><span class="inline-flex items-center px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-surface-container border border-surface-container-high text-secondary">${r.status}</span></td>
+        <td class="py-space-sm px-space-md whitespace-nowrap">${r.units} unit${r.units>1?'s':''}</td>
+      </tr>`).join('');
+    document.getElementById('overview-count').textContent='Displaying '+Math.min(requests.length,8)+' of '+requests.length+' events';
+  }catch(e){
+    document.getElementById('recent-requests-body').innerHTML='<tr><td colspan="5" class="py-4 px-space-md text-center text-secondary font-body-sm">Backend offline</td></tr>';
+    document.getElementById('stat-total-requests').textContent='0';
+    document.getElementById('stat-donors').textContent='0';
+    document.getElementById('stat-users').textContent='0';
+  }
+}
+
+// USERS
+async function loadUsers(){
+  try{
+    const[dRes,rRes]=await Promise.all([fetch(API+'/donors'),fetch(API+'/requests')]);
+    const donors=dRes.ok?await dRes.json():[];
+    const requests=rRes.ok?await rRes.json():[];
+    const map={};
+    donors.forEach(d=>{map[d.userId]={id:d.userId,name:d.name,phone:d.phone,role:'donor',bloodGroup:d.bloodGroup,createdAt:d.createdAt};});
+    requests.forEach(r=>{if(!map[r.userId])map[r.userId]={id:r.userId,name:r.name,phone:r.phone,role:'receiver',bloodGroup:'-',createdAt:r.createdAt};});
+    allUsers=Object.values(map);
+    document.getElementById('users-total').textContent=allUsers.length;
+    document.getElementById('users-donors').textContent=allUsers.filter(u=>u.role==='donor').length;
+    document.getElementById('users-receivers').textContent=allUsers.filter(u=>u.role==='receiver').length;
+    renderUsers();
+  }catch(e){
+    document.getElementById('users-tbody').innerHTML='<tr><td colspan="5" class="py-6 px-space-md text-center text-secondary">Backend offline</td></tr>';
+  }
+}
+
+function renderUsers(){
+  const q=(document.getElementById('user-search').value||'').toLowerCase();
+  const filtered=allUsers.filter(u=>{
+    const tab=userFilter==='all'||u.role===userFilter;
+    const s=!q||(u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q);
+    return tab&&s;
+  });
+  document.getElementById('users-label').textContent='Showing '+filtered.length+' of '+allUsers.length+' users';
+  if(!filtered.length){document.getElementById('users-tbody').innerHTML='<tr><td colspan="5" class="py-6 px-space-md text-center text-secondary">No users found</td></tr>';return;}
+  document.getElementById('users-tbody').innerHTML=filtered.map(u=>{
+    const init=(u.name||'?').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+    return`<tr class="hover:bg-surface-container-low/60 transition-colors border-t border-surface-container-high">
+      <td class="py-space-sm px-space-md"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-label-sm shrink-0">${init}</div><div class="min-w-0"><div class="font-label-md text-on-surface font-medium truncate">${u.name||'Unknown'}</div><div class="font-code-sm text-[11px] text-secondary truncate">ID: ${u.id}</div></div></div></td>
+      <td class="py-space-sm px-space-md font-code-sm text-[12px] text-secondary">${u.phone||'-'}</td>
+      <td class="py-space-sm px-space-md"><span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-DEFAULT bg-surface-container text-on-surface"><span class="w-1.5 h-1.5 rounded-full ${u.role==='donor'?'bg-primary':'bg-tertiary'}"></span>${u.role.charAt(0).toUpperCase()+u.role.slice(1)}</span></td>
+      <td class="py-space-sm px-space-md font-label-sm text-label-sm">${u.bloodGroup||'-'}</td>
+      <td class="py-space-sm px-space-md font-code-sm text-[12px] text-secondary">${u.createdAt?new Date(u.createdAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}):'-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('bg-surface-container-lowest','text-on-surface','shadow-sm');b.classList.add('text-secondary');});
+  btn.classList.add('bg-surface-container-lowest','text-on-surface','shadow-sm');btn.classList.remove('text-secondary');
+  userFilter=btn.dataset.filter;renderUsers();
+}));
+document.getElementById('user-search').addEventListener('input',renderUsers);
+
+// AUDIT
+async function loadAudit(){
+  try{
+    const res=await fetch(API+'/requests');
+    auditData=res.ok?await res.json():[];
+    renderAudit();
+  }catch(e){
+    document.getElementById('audit-tbody').innerHTML='<tr><td colspan="4" class="py-6 px-space-md text-center text-secondary">Backend offline</td></tr>';
+  }
+}
+
+function renderAudit(){
+  const q=(document.getElementById('audit-search').value||'').toLowerCase();
+  const f=document.getElementById('audit-filter').value;
+  const filtered=auditData.filter(r=>{
+    const mt=f==='all'||r.status===f;
+    const ms=!q||(r.hospital||'').toLowerCase().includes(q)||r.bloodGroup.toLowerCase().includes(q)||r.status.toLowerCase().includes(q);
+    return mt&&ms;
+  });
+  document.getElementById('audit-label').textContent='Showing '+filtered.length+' of '+auditData.length+' events';
+  if(!filtered.length){document.getElementById('audit-tbody').innerHTML='<tr><td colspan="4" class="py-6 px-space-md text-center text-secondary">No events match your filter</td></tr>';return;}
+  const badge=s=>{
+    if(s==='searching')return'<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-DEFAULT bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>Blood Request Active</span>';
+    if(s==='accepted')return'<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-DEFAULT bg-surface-container text-tertiary font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Request Accepted</span>';
+    return'<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-DEFAULT bg-surface-container text-secondary font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>'+s+'</span>';
+  };
+  const ago=d=>{const s=Math.floor((Date.now()-new Date(d).getTime())/1000);return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago';};
+  document.getElementById('audit-tbody').innerHTML=filtered.map(r=>`
+    <tr class="hover:bg-surface-container-low/50 transition-colors group">
+      <td class="py-2.5 px-space-md whitespace-nowrap"><div class="flex flex-col"><span class="font-code-sm text-code-sm text-on-surface font-medium">${new Date(r.createdAt).toLocaleString()}</span><span class="font-label-sm text-[10px] text-secondary">${ago(r.createdAt)}</span></div></td>
+      <td class="py-2.5 px-space-md">${badge(r.status)}</td>
+      <td class="py-2.5 px-space-md"><div class="flex flex-col"><span class="text-on-surface">Hospital: <strong class="font-medium">${r.hospital||'-'}</strong> - ${r.units} unit${r.units>1?'s':''} of <strong>${r.bloodGroup}</strong></span><span class="font-code-sm text-[11px] text-secondary">Urgency: ${r.urgency||'standard'} - Request #${r.id}</span></div></td>
+      <td class="py-2.5 px-space-md"><span class="inline-flex items-center px-1.5 py-0.5 rounded-DEFAULT text-label-sm ${r.status==='searching'?'bg-surface-container border border-surface-container-high text-secondary':'bg-surface-container text-tertiary'}">${r.status}</span></td>
+    </tr>`).join('');
+}
+
+document.getElementById('audit-search').addEventListener('input',renderAudit);
+document.getElementById('audit-filter').addEventListener('change',renderAudit);
+
+// HOSPITAL FILTER
+function filterHospitals(){
+  const q=(document.getElementById('hospital-search').value||'').toLowerCase();
+  const f=document.getElementById('hospital-filter').value;
+  document.querySelectorAll('.hosp-row').forEach(row=>{
+    const text=row.innerText.toLowerCase();
+    const s=row.dataset.status;
+    row.style.display=((!q||text.includes(q))&&(f==='all'||s===f))?'':'none';
+  });
+}
+
+// HOSPITAL APPROVE/REJECT
+document.querySelectorAll('.approve-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  const row=btn.closest('tr');
+  const badge=row.querySelector('.h-badge');
+  badge.innerHTML='<span class="material-symbols-outlined text-[12px] text-tertiary">check_circle</span>Verified';
+  badge.className='h-badge inline-flex items-center gap-1 px-2 py-0.5 rounded-DEFAULT bg-surface-container text-tertiary font-label-sm text-label-sm font-medium';
+  row.dataset.status='verified';
+  btn.closest('div').innerHTML='<button class="bg-surface-container-high text-on-surface hover:bg-surface-dim px-2.5 py-1 rounded-DEFAULT font-label-sm text-label-sm transition-colors">Manage</button><button class="bg-surface-container-low text-secondary hover:text-error px-2.5 py-1 rounded-DEFAULT font-label-sm text-label-sm transition-colors">Revoke</button>';
+}));
+document.querySelectorAll('.reject-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  const row=btn.closest('tr');
+  row.style.transition='opacity 0.3s';row.style.opacity='0';setTimeout(()=>row.style.display='none',300);
+}));
+</script>
+</body>
+</html>

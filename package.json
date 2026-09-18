@@ -1,0 +1,14 @@
+{
+  "name": "lifelink",
+  "version": "1.0.0",
+  "description": "LifeLink — Emergency Blood Donation Network",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --prefix-colors \"bgRed.bold,bgBlue.bold,bgGreen.bold\" --names \"BACKEND,USER-APP,HOSPITAL\" \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:hospital\"",
+    "dev:backend": "node backend/server.js",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:hospital": "cd hospital_frontend && npm run dev"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
