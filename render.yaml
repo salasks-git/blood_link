@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: lifelink-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    rootDir: backend
+    envVars:
+      - key: DB_PATH
+        value: /data/database.sqlite
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1

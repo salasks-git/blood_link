@@ -42,7 +42,7 @@ const CreateRequest = () => {
   useEffect(() => {
     const fetchDonorCount = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/donors?bloodGroup=${encodeURIComponent(selectedBlood)}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/donors?bloodGroup=${encodeURIComponent(selectedBlood)}`);
         if (res.ok) {
           const data = await res.json();
           setNearbyCount(data.length);
@@ -64,7 +64,7 @@ const CreateRequest = () => {
     const userId = localStorage.getItem('userId');
 
     try {
-      const response = await fetch('http://localhost:5001/api/requests', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,7 +82,7 @@ const CreateRequest = () => {
         const created = await response.json();
         // Notify matching donors
         try {
-          const notifyRes = await fetch(`http://localhost:5001/api/requests/${created.id}/notify-donors`, {
+          const notifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests/${created.id}/notify-donors`, {
             method: 'POST'
           });
           if (notifyRes.ok) {

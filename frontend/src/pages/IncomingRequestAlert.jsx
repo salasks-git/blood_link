@@ -26,7 +26,7 @@ const IncomingRequestAlert = () => {
     if (!userId) { navigate('/'); return; }
     const fetch_ = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/requests/for-donor/${userId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests/for-donor/${userId}`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         setBloodGroup(data.bloodGroup);
@@ -53,7 +53,7 @@ const IncomingRequestAlert = () => {
     setConsentReq(null);
     setActionState(s => ({ ...s, [req.id]: 'accepting' }));
     try {
-      await fetch(`http://localhost:5001/api/requests/${req.id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests/${req.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'accepted', donorId: userId }),

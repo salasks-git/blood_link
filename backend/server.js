@@ -13,7 +13,7 @@ app.use(express.json());
 app.use('/admin', express.static(path.join(__dirname, '../admin')));
 
 // Database connection
-const dbPath = path.resolve(__dirname, 'database.sqlite');
+const dbPath = process.env.DB_PATH || path.resolve(__dirname, 'database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error connecting to the SQLite database:', err.message);

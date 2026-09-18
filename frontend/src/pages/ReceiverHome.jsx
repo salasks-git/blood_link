@@ -12,7 +12,7 @@ const ReceiverHome = () => {
     if (!userId) { navigate('/'); return; }
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/users/${userId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setUserName(data.name || 'User');
@@ -21,7 +21,7 @@ const ReceiverHome = () => {
     };
     const fetchRequests = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/requests?userId=${userId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests?userId=${userId}`);
         if (res.ok) {
           const data = await res.json();
           setMyRequests(data);

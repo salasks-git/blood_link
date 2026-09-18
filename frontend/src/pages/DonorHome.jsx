@@ -15,7 +15,7 @@ const DonorHome = () => {
     if (!userId) { navigate('/'); return; }
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/users/${userId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setDonorName(data.name || 'Donor');
@@ -27,12 +27,12 @@ const DonorHome = () => {
       try {
         // Accepted requests that this donor accepted (filtered by userId who created them as receiver)
         // For simplicity: show all accepted requests matching donor's blood group
-        const profileRes = await fetch(`http://localhost:5001/api/users/${userId}`);
+        const profileRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`);
         if (profileRes.ok) {
           const profile = await profileRes.json();
           const bg = profile.donorInfo?.bloodGroup;
           if (bg) {
-            const res = await fetch(`http://localhost:5001/api/requests?status=accepted`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests?status=accepted`);
             if (res.ok) {
               const data = await res.json();
               setPastDonations(data.filter(r => r.bloodGroup === bg));

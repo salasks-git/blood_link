@@ -18,7 +18,7 @@ const RoleSelection = () => {
     }
 
     try {
-      await fetch(`http://localhost:5001/api/users/${userId}/role`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}/role`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role })
@@ -32,7 +32,7 @@ const RoleSelection = () => {
     } else {
       // Check if user is already a donor
       try {
-        const res = await fetch(`http://localhost:5001/api/users/${userId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`);
         if (res.ok) {
           const data = await res.json();
           if (data.donorInfo && data.donorInfo.bloodGroup) {

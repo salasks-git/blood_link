@@ -12,7 +12,7 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const API = 'http://localhost:5001';
+const API = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}`;
 
 const LocationMarker = ({ position, setPosition, onChange }) => {
   useMapEvents({

@@ -17,7 +17,7 @@ const RequestStatus = () => {
         return;
       }
       try {
-        const res = await fetch(`http://localhost:5001/api/requests/${requestId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests/${requestId}`);
         if (res.ok) {
           const data = await res.json();
           setRequest(data);

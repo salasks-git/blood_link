@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SetLocationMap from '../components/SetLocationMap';
 
-const API = 'http://localhost:5001';
+const API = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}`;
 
 const timeAgo = (dateStr) => {
   if (!dateStr) return '—';

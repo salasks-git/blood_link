@@ -26,7 +26,7 @@ const Profile = () => {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/users/${userId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`);
         if (res.ok) {
           const data = await res.json();
           setProfile({
@@ -68,7 +68,7 @@ const Profile = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch(`http://localhost:5001/api/users/${userId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
