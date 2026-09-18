@@ -12,15 +12,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/admin', express.static(path.join(__dirname, '../admin')));
 
-// Database connection
-const dbPath = process.env.DB_PATH || path.resolve(__dirname, 'database.sqlite');
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Error connecting to the SQLite database:', err.message);
-    } else {
-        console.log('Connected to the SQLite database.');
-        // Initialize tables here
-        db.serialize(() => {
+const db = require('./db');
+console.log('Connected to the PostgreSQL database.');
+// Initialize tables here
+db.serialize(() => {
             db.run(`CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 phone TEXT UNIQUE,
@@ -99,8 +94,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 // We'll just run it once.
             });
         });
-    }
-});
+
 
 // Basic route
 app.get('/api/health', (req, res) => {
