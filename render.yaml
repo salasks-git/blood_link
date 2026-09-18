@@ -2,6 +2,7 @@ services:
   - type: web
     name: lifelink-backend
     env: node
+    plan: free
     buildCommand: npm install
     startCommand: node server.js
     rootDir: backend
