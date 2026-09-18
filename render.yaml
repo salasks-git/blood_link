@@ -6,11 +6,8 @@ services:
     startCommand: node server.js
     rootDir: backend
     envVars:
-      - key: DB_PATH
-        value: /data/database.sqlite
+      - key: DATABASE_URL
+        sync: false
       - key: NODE_ENV
         value: production
-    disk:
-      name: sqlite-data
-      mountPath: /data
-      sizeGB: 1
+
