@@ -6,7 +6,11 @@
     "dev": "concurrently --kill-others-on-fail --prefix-colors \"bgRed.bold,bgBlue.bold,bgGreen.bold\" --names \"BACKEND,USER-APP,HOSPITAL\" \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:hospital\"",
     "dev:backend": "node backend/server.js",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:hospital": "cd hospital_frontend && npm run dev"
+    "dev:hospital": "cd hospital_frontend && npm run dev",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build:hospital": "cd hospital_frontend && npm install && npm run build",
+    "build:unified": "rm -rf dist && mkdir -p dist && cp -r landing/* dist/ && cp -r frontend/dist dist/user && cp -r hospital_frontend/dist dist/hospital && cp -r admin dist/admin",
+    "build": "npm run build:frontend && npm run build:hospital && npm run build:unified"
   },
   "dependencies": {
     "concurrently": "^8.2.2"

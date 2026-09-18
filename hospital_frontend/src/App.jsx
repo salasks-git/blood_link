@@ -16,7 +16,7 @@ import SetupLocation from './pages/SetupLocation';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/hospital">
       <Routes>
         {/* Root always sends hospital staff to their login */}
         <Route path="/" element={<Navigate to="/staff-login" replace />} />

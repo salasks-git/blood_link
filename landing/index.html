@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLink — Emergency Blood Donation Network</title>
+    <style>
+        :root {
+            --primary: #ef4444;
+            --primary-hover: #dc2626;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(353,100%,76%,0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(353,100%,76%,0.05) 0px, transparent 50%);
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .hero {
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(to right, #fca5a5, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cards {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 40px 32px;
+            width: 320px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: left;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            background: rgba(239, 68, 68, 0.1);
+            width: 96px;
+            height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .card { width: 100%; max-width: 360px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>LifeLink</h1>
+            <p>Select your portal to enter the emergency blood donation network and help save lives today.</p>
+        </div>
+
+        <div class="cards">
+            <!-- User / Donor Portal -->
+            <a href="/user/" class="card">
+                <div class="card-icon">🩸</div>
+                <h2>Donor / Patient</h2>
+                <p>Register to donate blood, respond to alerts, or request emergency blood units.</p>
+            </a>
+
+            <!-- Hospital Portal -->
+            <a href="/hospital/" class="card">
+                <div class="card-icon">🏥</div>
+                <h2>Hospital Portal</h2>
+                <p>Manage blood inventory, broadcast emergency requests, and view verified donors.</p>
+            </a>
+
+            <!-- Admin Panel -->
+            <a href="/admin/" class="card">
+                <div class="card-icon">🛡️</div>
+                <h2>Admin Panel</h2>
+                <p>Verify hospital registrations and oversee system analytics via the Trust Layer.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

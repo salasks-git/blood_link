@@ -18,7 +18,7 @@ import BottomNav from './components/BottomNav';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/user">
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Auth />} />
