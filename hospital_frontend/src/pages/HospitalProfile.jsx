@@ -2,12 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SetLocationMap from '../components/SetLocationMap';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const HospitalProfile = () => {
   const navigate = useNavigate();
   const hospitalName = localStorage.getItem('hospitalName') || 'Hospital';
   const hospitalId = localStorage.getItem('hospitalId') || '';
   const locality = localStorage.getItem('hospitalLocality') || 'Unknown';
   const role = localStorage.getItem('hospitalRole') || 'hospital_admin';
+
+  const [savedLocation, setSavedLocation] = useState(null); // { latitude, longitude, locality }
+  const [loadingLocation, setLoadingLocation] = useState(true);
+  const [editingLocation, setEditingLocation] = useState(false);
+
+  // Fetch saved location on mount
+  useEffect(() => {
+    if (!hospitalId) { setLoadingLocation(false); return; }
+    fetch(`${API}/api/hospital/location?hospitalId=${encodeURIComponent(hospitalId)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.latitude && data.longitude) {
+          setSavedLocation(data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingLocation(false));
+  }, [hospitalId]);
+
+  const handleLocationSaved = () => {
+    // Refresh saved location and close editor
+    fetch(`${API}/api/hospital/location?hospitalId=${encodeURIComponent(hospitalId)}`)
+      .then(r => r.json())
+      .then(data => { if (data.latitude) setSavedLocation(data); })
+      .catch(() => {});
+    setEditingLocation(false);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('hospitalId');
@@ -92,8 +121,80 @@ const HospitalProfile = () => {
             <h1 className="font-headline-md text-headline-md text-on-surface uppercase tracking-tight mb-2">Hospital Profile</h1>
             <p className="font-body-md text-body-md text-on-surface-variant">Manage your hospital's geolocation and settings.</p>
           </div>
-          
-          <SetLocationMap hospitalId={hospitalId} />
+
+          {/* Location Card */}
+          <div className="bg-surface-container-lowest shadow-sm flex flex-col gap-space-md p-space-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider">Hospital Geolocation</h2>
+                <p className="font-body-sm text-body-sm text-secondary mt-1">
+                  {editingLocation
+                    ? "Click on the map or search to update your hospital's location."
+                    : "Your hospital's saved location for precise donor matching."}
+                </p>
+              </div>
+              {!editingLocation && (
+                <button
+                  onClick={() => setEditingLocation(true)}
+                  className="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-xl text-secondary hover:bg-surface-container-high hover:text-on-surface transition-all font-label-md uppercase"
+                >
+                  <span className="material-symbols-outlined text-[18px]">edit_location</span>
+                  Edit Location
+                </button>
+              )}
+              {editingLocation && (
+                <button
+                  onClick={() => setEditingLocation(false)}
+                  className="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-xl text-secondary hover:bg-surface-container-high transition-all font-label-md uppercase"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  Cancel
+                </button>
+              )}
+            </div>
+
+            {/* Saved location display (view mode) */}
+            {!editingLocation && (
+              <div>
+                {loadingLocation ? (
+                  <div className="flex items-center gap-3 py-6 text-secondary">
+                    <span className="material-symbols-outlined text-[20px] animate-spin">refresh</span>
+                    <span className="font-body-md">Loading saved location...</span>
+                  </div>
+                ) : savedLocation ? (
+                  <div className="flex items-start gap-4 bg-surface-container-low border border-outline-variant rounded-xl p-4">
+                    <div className="w-10 h-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[22px]">location_on</span>
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <span className="font-label-sm text-secondary uppercase font-bold tracking-wider mb-1">Saved Location</span>
+                      <span className="font-body-md text-on-surface">{savedLocation.locality || `${parseFloat(savedLocation.latitude).toFixed(4)}, ${parseFloat(savedLocation.longitude).toFixed(4)}`}</span>
+                      <span className="font-code-sm text-[11px] text-secondary mt-0.5">
+                        Lat: {parseFloat(savedLocation.latitude).toFixed(6)}, Lng: {parseFloat(savedLocation.longitude).toFixed(6)}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 bg-surface-container-low border border-outline-variant rounded-xl p-4">
+                    <span className="material-symbols-outlined text-secondary text-[22px]">location_off</span>
+                    <div>
+                      <p className="font-label-md text-on-surface">No location set yet</p>
+                      <p className="font-body-sm text-secondary">Click "Edit Location" to set your hospital on the map.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Edit mode: show full map */}
+            {editingLocation && (
+              <SetLocationMap
+                hospitalId={hospitalId}
+                onLocationSaved={handleLocationSaved}
+                initialLocation={savedLocation ? { lat: parseFloat(savedLocation.latitude), lng: parseFloat(savedLocation.longitude) } : null}
+              />
+            )}
+          </div>
         </div>
       </main>
     </div>

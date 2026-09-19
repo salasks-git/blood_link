@@ -28,7 +28,7 @@ const LocationMarker = ({ position, setPosition, onChange }) => {
 };
 
 const SetLocationMap = ({ hospitalId, onLocationSaved, initialLocation, onChange, onAddressChange, pickerOnly }) => {
-  const [position, setPosition] = useState(null); // { lat, lng }
+  const [position, setPosition] = useState(initialLocation || null); // { lat, lng }
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +36,7 @@ const SetLocationMap = ({ hospitalId, onLocationSaved, initialLocation, onChange
   const [searchError, setSearchError] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [placeName, setPlaceName] = useState('Fetching address...');
+  const [placeName, setPlaceName] = useState(initialLocation ? 'Fetching address...' : 'No location selected');
   const mapRef = useRef();
   const skipReverseGeocode = useRef(false);
 
@@ -81,8 +81,13 @@ const SetLocationMap = ({ hospitalId, onLocationSaved, initialLocation, onChange
     }
   };
 
-  // Try to get current browser location on mount if no position set
+  // Set initial location from prop (previously saved), or fall back to geolocation
   useEffect(() => {
+    if (initialLocation) {
+      setPosition(initialLocation);
+      return;
+    }
+    // Only auto-geolocate if no saved location provided
     if (!position && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -94,11 +99,11 @@ const SetLocationMap = ({ hospitalId, onLocationSaved, initialLocation, onChange
         },
         () => {
           // Default to a generic location if permission denied
-          setPosition({ lat: 40.7128, lng: -74.0060 });
+          setPosition({ lat: 10.5, lng: 76.2 });
         }
       );
     }
-  }, [position]);
+  }, []);
 
   // Reverse geocode whenever position changes (only for map clicks / locate me)
   useEffect(() => {

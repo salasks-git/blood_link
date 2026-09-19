@@ -600,6 +600,17 @@ app.post('/api/hospital/auth/login', (req, res) => {
     });
 });
 
+// Hospital: Get Location
+app.get('/api/hospital/location', (req, res) => {
+    const { hospitalId } = req.query;
+    if (!hospitalId) return res.status(400).json({ error: 'hospitalId is required' });
+    db.get(`SELECT latitude, longitude, locality FROM hospital_staff WHERE hospitalId = ?`, [hospitalId], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Hospital not found' });
+        res.json({ latitude: row.latitude, longitude: row.longitude, locality: row.locality });
+    });
+});
+
 // Hospital: Set Location
 app.put('/api/hospital/location', (req, res) => {
     const { hospitalId, latitude, longitude } = req.body;
