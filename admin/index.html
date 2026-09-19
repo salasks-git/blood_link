@@ -792,7 +792,8 @@
             phone: u.phone,
             derivedRole: role,
             bloodGroup: donor ? (donor.bloodgroup || donor.bloodGroup || '-') : '-',
-            location: donor && donor.locality ? donor.locality : '-',
+            location: (donor && donor.locality) ? donor.locality : 
+                      (u.lat && u.lon ? `${parseFloat(u.lat).toFixed(4)}, ${parseFloat(u.lon).toFixed(4)}` : '-'),
             createdAt: u.createdat || u.createdAt
           };
         });

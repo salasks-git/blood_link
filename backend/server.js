@@ -209,7 +209,12 @@ app.delete('/api/admin/hospitals/:id', (req, res) => {
 });
 
 app.get('/api/admin/users', (req, res) => {
-    db.all(`SELECT id, name, phone, role, createdAt FROM users`, [], (err, rows) => {
+    db.all(`
+        SELECT u.id, u.name, u.phone, u.role, u.createdAt,
+               (SELECT latitude FROM user_locations WHERE userId = u.id ORDER BY created_at DESC LIMIT 1) as lat,
+               (SELECT longitude FROM user_locations WHERE userId = u.id ORDER BY created_at DESC LIMIT 1) as lon
+        FROM users u
+    `, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
