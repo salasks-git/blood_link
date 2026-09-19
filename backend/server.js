@@ -8,14 +8,22 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware — allow frontend origin (set FRONTEND_URL env var in production)
 const allowedOrigins = [
-  'https://blood-link-ten-lilac.vercel.app',  // production
-  'http://localhost:5173',                      // dev: user frontend
-  'http://localhost:5174',                      // dev: hospital frontend
+  /^https:\/\/blood-link.*\.vercel\.app$/,     // any blood-link Vercel deployment (preview + prod)
+  'http://localhost:5173',                       // dev: user frontend
+  'http://localhost:5174',                       // dev: hospital frontend
 ];
 if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    // allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    const allowed = allowedOrigins.some(o =>
+      typeof o === 'string' ? o === origin : o.test(origin)
+    );
+    if (allowed) return callback(null, true);
+    return callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
   credentials: true
 }));
 
