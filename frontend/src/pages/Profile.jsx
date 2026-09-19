@@ -18,6 +18,8 @@ const Profile = () => {
     donorInfo: null
   });
 
+  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
   useEffect(() => {
     if (!userId) {
       navigate('/');
@@ -172,21 +174,36 @@ const Profile = () => {
                 </div>
               </div>
 
-              {profile.role === 'donor' && profile.donorInfo && (
-                <div className="flex flex-col gap-space-sm mb-space-md">
+              {profile.role === 'donor' && (
+                <div className={`flex flex-col gap-space-sm mb-space-md ${profile.donorInfo?.bloodGroup ? 'opacity-70' : ''}`}>
                   <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-                    Blood Group
+                    Blood Group {profile.donorInfo?.bloodGroup ? '(Cannot be changed)' : ''}
                   </label>
                   <div className="flex items-center w-full h-12 px-space-md rounded-full bg-surface-container-lowest shadow-sm border border-transparent focus-within:border-primary/50 transition-colors">
-                    <input
-                      className="w-full bg-transparent font-body-lg text-body-lg text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none"
-                      value={profile.donorInfo.bloodGroup || ''}
-                      onChange={e => setProfile({
-                        ...profile, 
-                        donorInfo: {...profile.donorInfo, bloodGroup: e.target.value}
-                      })}
-                      type="text"
-                    />
+                    {profile.donorInfo?.bloodGroup ? (
+                      // Locked — blood group already set
+                      <div className="flex items-center gap-2 w-full">
+                        <span className="material-symbols-outlined text-[18px] text-on-surface-variant">lock</span>
+                        <span className="font-body-lg text-body-lg text-on-surface">
+                          {profile.donorInfo.bloodGroup}
+                        </span>
+                      </div>
+                    ) : (
+                      // Not set yet — show dropdown
+                      <select
+                        className="w-full bg-transparent font-body-lg text-body-lg text-on-surface focus:outline-none appearance-none"
+                        value={profile.donorInfo?.bloodGroup || ''}
+                        onChange={e => setProfile({
+                          ...profile,
+                          donorInfo: { ...(profile.donorInfo || {}), bloodGroup: e.target.value }
+                        })}
+                      >
+                        <option value="">Select blood group</option>
+                        {bloodGroups.map(bg => (
+                          <option key={bg} value={bg}>{bg}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 </div>
               )}
