@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const timeAgo = (dateStr) => {
+  if (!dateStr) return 'Just now';
   // SQLite returns "YYYY-MM-DD HH:MM:SS" in UTC. Convert to ISO format so browser parses as UTC.
   const utcDateStr = dateStr.includes('Z') ? dateStr : dateStr.replace(' ', 'T') + 'Z';
   const diff = Math.floor((Date.now() - new Date(utcDateStr).getTime()) / 1000);
@@ -201,7 +202,7 @@ const IncomingRequestAlert = () => {
                   {/* Timestamp */}
                   <div className="flex items-center gap-1 text-on-surface-variant mb-space-md">
                     <span className="material-symbols-outlined text-[15px]">schedule</span>
-                    <span className="font-label-md text-label-md">Requested {timeAgo(req.createdAt)}</span>
+                    <span className="font-label-md text-label-md">Requested {timeAgo(req.createdAt || req.createdat)}</span>
                   </div>
 
                   {/* Hospital info */}
