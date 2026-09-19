@@ -486,7 +486,7 @@ async function loadUsers(){
     
     // Build donor lookup by userid (has donor registration = is a donor)
     const donorLookup={};
-    donorsRaw.forEach(d=>{ donorLookup[String(d.userid)]=d; });
+    donorsRaw.forEach(d=>{ donorLookup[String(d.userId || d.userid)]=d; });
     
     // Build receiver lookup by userId (has blood request = has acted as receiver)
     const receiverLookup={};
