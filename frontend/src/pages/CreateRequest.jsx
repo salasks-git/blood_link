@@ -37,6 +37,27 @@ const CreateRequest = () => {
   const [showToast, setShowToast] = useState(false);
   const [nearbyCount, setNearbyCount] = useState(null);
   const [notifiedCount, setNotifiedCount] = useState(0);
+  const [hospitalsList, setHospitalsList] = useState([]);
+
+  // Fetch approved hospitals for the dropdown
+  useEffect(() => {
+    const fetchHospitals = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/hospitals`);
+        if (res.ok) {
+          const data = await res.json();
+          setHospitalsList(data);
+          if (data.length > 0 && hospital === 'City Central Hospital, Ward 4') {
+             // Set default hospital to the first approved one if the old default is still present
+             setHospital(data[0].hospitalName);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch hospitals', e);
+      }
+    };
+    fetchHospitals();
+  }, []);
 
   // Fetch matching donor count whenever blood group changes
   useEffect(() => {
@@ -226,31 +247,27 @@ const CreateRequest = () => {
             </div>
 
             {/* Hospital Field */}
-            <div className="flex flex-col gap-space-xs">
-              <label className="font-label-lg text-label-lg text-on-surface" htmlFor="hospitalName">Hospital &amp; Ward Details</label>
+            <div className="flex flex-col gap-space-xs z-10 relative">
+              <label className="font-label-lg text-label-lg text-on-surface" htmlFor="hospitalName">Hospital</label>
               <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px]">local_hospital</span>
-                <input
-                  className="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-DEFAULT py-3.5 pl-11 pr-10 focus:outline-none focus:bg-surface-container transition-colors"
+                <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px] pointer-events-none">local_hospital</span>
+                <select
+                  className="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-DEFAULT py-3.5 pl-11 pr-10 focus:outline-none focus:bg-surface-container transition-colors appearance-none cursor-pointer"
                   id="hospitalName"
-                  placeholder="Enter hospital name and room/ward"
                   required
-                  type="text"
                   value={hospital}
                   onChange={e => setHospital(e.target.value)}
-                />
-                {hospital && (
-                  <button
-                    aria-label="Clear text"
-                    className="absolute right-3 text-on-surface-variant hover:text-on-surface"
-                    onClick={() => setHospital('')}
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">cancel</span>
-                  </button>
-                )}
+                >
+                  <option value="" disabled>Select a hospital</option>
+                  {hospitalsList.map((h, i) => (
+                    <option key={h.id || i} value={h.hospitalName}>
+                      {h.hospitalName} {h.locality ? `(${h.locality})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <span className="material-symbols-outlined absolute right-3.5 text-on-surface-variant text-[20px] pointer-events-none">expand_more</span>
               </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant pl-1">Donors will navigate directly to this reception station</p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant pl-1">Select an approved hospital for the request</p>
             </div>
 
             {/* Map Selector */}
