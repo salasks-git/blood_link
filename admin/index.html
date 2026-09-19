@@ -390,6 +390,7 @@ function triggerAuth(){
   const t=document.getElementById('btnText');
   btn.disabled=true;t.textContent='Verifying Credentials...';
   setTimeout(()=>{
+    localStorage.setItem('admin_auth', 'true');
     document.getElementById('login-page').style.display='none';
     document.getElementById('dashboard-shell').classList.remove('hidden');
     navigateTo('overview');
@@ -399,6 +400,7 @@ function triggerAuth(){
 }
 
 function signOut(){
+  localStorage.removeItem('admin_auth');
   document.getElementById('dashboard-shell').classList.add('hidden');
   document.getElementById('login-page').style.display='flex';
 }
@@ -565,6 +567,14 @@ document.querySelectorAll('.reject-btn').forEach(btn=>btn.addEventListener('clic
   const row=btn.closest('tr');
   row.style.transition='opacity 0.3s';row.style.opacity='0';setTimeout(()=>row.style.display='none',300);
 }));
+
+// INIT
+if(localStorage.getItem('admin_auth')==='true'){
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('dashboard-shell').classList.remove('hidden');
+  navigateTo('overview');
+  loadAll();
+}
 </script>
 </body>
 </html>
