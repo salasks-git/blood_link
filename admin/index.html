@@ -223,9 +223,9 @@
               <p class="font-body-md text-body-md text-secondary mt-0.5">Review, verify, and manage registered medical facilities.</p></div>
             <div class="flex items-center gap-space-sm">
               <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-DEFAULT flex items-center gap-space-md border border-surface-container-high">
-                <div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Pending Review</div><div class="font-headline-lg text-headline-lg text-primary leading-none mt-0.5">0</div></div>
+                <div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Pending Review</div><div class="font-headline-lg text-headline-lg text-primary leading-none mt-0.5" id="hosp-pending-count">0</div></div>
                 <div class="w-px h-6 bg-surface-container-high"></div>
-                <div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Active Hubs</div><div class="font-headline-lg text-headline-lg text-on-surface leading-none mt-0.5">0</div></div>
+                <div><div class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Active Hubs</div><div class="font-headline-lg text-headline-lg text-on-surface leading-none mt-0.5" id="hosp-active-count">0</div></div>
               </div>
             </div>
           </div>
@@ -430,21 +430,21 @@ async function loadAll(){
 // OVERVIEW
 async function loadOverview(){
   try{
-    const[rRes,dRes]=await Promise.all([fetch(API+'/requests'),fetch(API+'/donors')]);
+    const[rRes,dRes]=await Promise.all([fetch(API+'/admin/requests'),fetch(API+'/donors')]);
     const requests=rRes.ok?await rRes.json():[];
     const donorsRaw=dRes.ok?await dRes.json():[];
     
-    // Deduplicate donors to show unique users
+    // Deduplicate donors by userid to show unique users
     const donorsMap = new Map();
-    donorsRaw.forEach(d => donorsMap.set(d.userId || d.userid, d));
+    donorsRaw.forEach(d => donorsMap.set(d.userid, d));
     const donors = Array.from(donorsMap.values());
 
     document.getElementById('stat-total-requests').textContent=requests.length;
     document.getElementById('stat-donors').textContent=donors.length;
-    const uids=new Set([...requests.map(r=>r.userId || r.userid),...donors.map(d=>d.userId || d.userid)]);
+    const uids=new Set([...requests.map(r=>r.userid || r.userId),...donors.map(d=>d.userid)]);
     document.getElementById('stat-users').textContent=uids.size;
     const bg={};donors.forEach(d=>{
-      const group = d.bloodGroup || d.bloodgroup || 'Unknown';
+      const group = d.bloodgroup || d.bloodGroup || 'Unknown';
       bg[group]=(bg[group]||0)+1;
     });
     document.getElementById('stat-donors-bg').textContent=Object.entries(bg).map(([g,c])=>g+': '+c).join(', ')||'No donors yet';
@@ -452,9 +452,9 @@ async function loadOverview(){
     if(!requests.length){tbody.innerHTML='<tr><td colspan="5" class="py-4 px-space-md text-center text-secondary font-body-sm">No requests yet</td></tr>';return;}
     tbody.innerHTML=requests.slice(0,8).map(r=>`
       <tr class="hover:bg-surface-container-low transition-colors">
-        <td class="py-space-sm px-space-md font-code-sm text-code-sm text-secondary whitespace-nowrap">${new Date(r.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
+        <td class="py-space-sm px-space-md font-code-sm text-code-sm text-secondary whitespace-nowrap">${new Date(r.createdat || r.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
         <td class="py-space-sm px-space-md font-medium text-on-surface whitespace-nowrap">${r.hospital||'-'}</td>
-        <td class="py-space-sm px-space-md"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-primary-fixed text-on-primary-fixed-variant">${r.bloodGroup || r.bloodgroup || '-'}</span></td>
+        <td class="py-space-sm px-space-md"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-primary-fixed text-on-primary-fixed-variant">${r.bloodgroup || r.bloodGroup || '-'}</span></td>
         <td class="py-space-sm px-space-md whitespace-nowrap"><span class="inline-flex items-center px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-surface-container border border-surface-container-high text-secondary">${r.status}</span></td>
         <td class="py-space-sm px-space-md whitespace-nowrap">${r.units} unit${r.units>1?'s':''}</td>
       </tr>`).join('');
@@ -470,13 +470,26 @@ async function loadOverview(){
 // USERS
 async function loadUsers(){
   try{
-    const[dRes,rRes]=await Promise.all([fetch(API+'/donors'),fetch(API+'/requests')]);
-    const donors=dRes.ok?await dRes.json():[];
-    const requests=rRes.ok?await rRes.json():[];
-    const map={};
-    donors.forEach(d=>{map[d.userId]={id:d.userId,name:d.name,phone:d.phone,role:'donor',bloodGroup:d.bloodGroup || d.bloodgroup || '-',createdAt:d.createdAt};});
-    requests.forEach(r=>{if(!map[r.userId])map[r.userId]={id:r.userId,name:r.name,phone:r.phone,role:'receiver',bloodGroup:'-',createdAt:r.createdAt};});
-    allUsers=Object.values(map);
+    // Use /api/admin/users for proper user list, supplement with donors for bloodgroup
+    const[uRes,dRes]=await Promise.all([fetch(API+'/admin/users'),fetch(API+'/donors')]);
+    const usersRaw=uRes.ok?await uRes.json():[];
+    const donorsRaw=dRes.ok?await dRes.json():[];
+    
+    // Build donor lookup by userid
+    const donorLookup={};
+    donorsRaw.forEach(d=>{ donorLookup[d.userid]=d; });
+    
+    allUsers=usersRaw.map(u=>{
+      const donor=donorLookup[u.id];
+      return {
+        id: u.id,
+        name: u.name,
+        phone: u.phone,
+        role: u.role || 'user',
+        bloodGroup: donor ? (donor.bloodgroup || donor.bloodGroup || '-') : '-',
+        createdAt: u.createdat || u.createdAt
+      };
+    });
     document.getElementById('users-total').textContent=allUsers.length;
     document.getElementById('users-donors').textContent=allUsers.filter(u=>u.role==='donor').length;
     document.getElementById('users-receivers').textContent=allUsers.filter(u=>u.role==='receiver').length;
@@ -517,7 +530,7 @@ document.getElementById('user-search').addEventListener('input',renderUsers);
 // AUDIT
 async function loadAudit(){
   try{
-    const res=await fetch(API+'/requests');
+    const res=await fetch(API+'/admin/requests');
     auditData=res.ok?await res.json():[];
     renderAudit();
   }catch(e){
@@ -530,7 +543,7 @@ function renderAudit(){
   const f=document.getElementById('audit-filter').value;
   const filtered=auditData.filter(r=>{
     const mt=f==='all'||r.status===f;
-    const ms=!q||(r.hospital||'').toLowerCase().includes(q)||(r.bloodGroup || r.bloodgroup || '').toLowerCase().includes(q)||r.status.toLowerCase().includes(q);
+    const ms=!q||(r.hospital||'').toLowerCase().includes(q)||(r.bloodgroup || r.bloodGroup || '').toLowerCase().includes(q)||r.status.toLowerCase().includes(q);
     return mt&&ms;
   });
   document.getElementById('audit-label').textContent='Showing '+filtered.length+' of '+auditData.length+' events';
@@ -543,9 +556,9 @@ function renderAudit(){
   const ago=d=>{const s=Math.floor((Date.now()-new Date(d).getTime())/1000);return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago';};
   document.getElementById('audit-tbody').innerHTML=filtered.map(r=>`
     <tr class="hover:bg-surface-container-low/50 transition-colors group">
-      <td class="py-2.5 px-space-md whitespace-nowrap"><div class="flex flex-col"><span class="font-code-sm text-code-sm text-on-surface font-medium">${new Date(r.createdAt).toLocaleString()}</span><span class="font-label-sm text-[10px] text-secondary">${ago(r.createdAt)}</span></div></td>
+      <td class="py-2.5 px-space-md whitespace-nowrap"><div class="flex flex-col"><span class="font-code-sm text-code-sm text-on-surface font-medium">${new Date(r.createdat || r.createdAt).toLocaleString()}</span><span class="font-label-sm text-[10px] text-secondary">${ago(r.createdat || r.createdAt)}</span></div></td>
       <td class="py-2.5 px-space-md">${badge(r.status)}</td>
-      <td class="py-2.5 px-space-md"><div class="flex flex-col"><span class="text-on-surface">Hospital: <strong class="font-medium">${r.hospital||'-'}</strong> - ${r.units} unit${r.units>1?'s':''} of <strong>${r.bloodGroup || r.bloodgroup || '-'}</strong></span><span class="font-code-sm text-[11px] text-secondary">Urgency: ${r.urgency||'standard'} - Request #${r.id}</span></div></td>
+      <td class="py-2.5 px-space-md"><div class="flex flex-col"><span class="text-on-surface">Hospital: <strong class="font-medium">${r.hospital||'-'}</strong> - ${r.units} unit${r.units>1?'s':''} of <strong>${r.bloodgroup || r.bloodGroup || '-'}</strong></span><span class="font-code-sm text-[11px] text-secondary">Urgency: ${r.urgency||'standard'} - Request #${r.id}</span></div></td>
       <td class="py-2.5 px-space-md"><span class="inline-flex items-center px-1.5 py-0.5 rounded-DEFAULT text-label-sm ${r.status==='searching'?'bg-surface-container border border-surface-container-high text-secondary':'bg-surface-container text-tertiary'}">${r.status}</span></td>
     </tr>`).join('');
 }
@@ -584,12 +597,12 @@ function renderHospitals() {
   const tbody = document.getElementById('hosp-tbody');
   tbody.innerHTML = allHospitals.map(h => `
     <tr class="hosp-row hover:bg-surface-container-low transition-colors" data-status="${h.status}" data-id="${h.id}">
-      <td class="py-space-sm px-space-md"><div class="flex flex-col"><span class="font-medium text-on-surface">${h.hospitalName || h.hospitalname}</span><span class="font-code-sm text-[11px] text-secondary">ID: ${h.hospitalId || h.hospitalid}</span></div></td>
-      <td class="py-space-sm px-space-md font-body-sm text-secondary">${h.locality || h.city || '-'}</td>
+      <td class="py-space-sm px-space-md"><div class="flex flex-col"><span class="font-medium text-on-surface">${h.hospitalname || h.hospitalName}</span><span class="font-code-sm text-[11px] text-secondary">ID: ${h.hospitalid || h.hospitalId}</span></div></td>
+      <td class="py-space-sm px-space-md font-body-sm text-secondary">${h.locality || h.city || 'N/A'}</td>
       <td class="py-space-sm px-space-md">
         ${h.status === 'pending' 
           ? '<span class="h-badge inline-flex items-center gap-1 px-2 py-0.5 rounded-DEFAULT bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>Pending Review</span>'
-          : '<span class="h-badge inline-flex items-center gap-1 px-2 py-0.5 rounded-DEFAULT bg-surface-container text-tertiary font-label-sm text-label-sm font-medium"><span class="material-symbols-outlined text-[12px] text-tertiary">check_circle</span>Verified</span>'}
+          : '<span class="h-badge inline-flex items-center gap-1 px-2 py-0.5 rounded-DEFAULT bg-surface-container text-tertiary font-label-sm text-label-sm font-medium"><span class="material-symbols-outlined text-[12px] text-tertiary">check_circle</span>Approved</span>'}
       </td>
       <td class="py-space-sm px-space-md whitespace-nowrap"><span class="inline-flex items-center px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-surface-container border border-surface-container-high text-secondary">API_LINKED</span></td>
       <td class="py-space-sm px-space-md text-right whitespace-nowrap">
@@ -603,6 +616,12 @@ function renderHospitals() {
       </td>
     </tr>`).join('');
     filterHospitals();
+    
+    // Update hospital stats
+    const pending = allHospitals.filter(h=>h.status==='pending').length;
+    const active = allHospitals.filter(h=>h.status==='approved').length;
+    document.getElementById('hosp-pending-count').textContent = pending;
+    document.getElementById('hosp-active-count').textContent = active;
     
     // Bind approve/reject buttons
     document.querySelectorAll('.approve-btn').forEach(btn=>btn.addEventListener('click', async ()=>{
