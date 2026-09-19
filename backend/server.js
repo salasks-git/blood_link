@@ -449,10 +449,17 @@ app.get('/api/users/:id', (req, res) => {
             db.get(`SELECT * FROM donors WHERE userId = ?`, [userId], (err, donorInfo) => {
                 if (err) return res.status(500).json({ error: err.message });
 
+                // Map PostgreSQL lowercase columns to camelCase for the frontend
+                const mappedDonorInfo = donorInfo ? {
+                    ...donorInfo,
+                    bloodGroup: donorInfo.bloodGroup || donorInfo.bloodgroup,
+                    lastDonation: donorInfo.lastDonation || donorInfo.lastdonation
+                } : null;
+
                 res.json({
                     ...user,
                     location: location ? { latitude: location.latitude, longitude: location.longitude } : null,
-                    donorInfo: donorInfo || null
+                    donorInfo: mappedDonorInfo
                 });
             });
         });
