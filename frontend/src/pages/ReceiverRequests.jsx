@@ -102,9 +102,9 @@ const ReceiverRequests = () => {
               <div className="flex flex-col items-center justify-center py-14 gap-3 text-on-surface-variant bg-surface-container-lowest rounded-2xl border border-dashed border-outline-variant p-6 text-center">
                 <span className="material-symbols-outlined text-[40px] text-outline">assignment</span>
                 <p className="font-title-sm text-title-sm text-on-surface font-semibold">No requests yet</p>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">Go home to create your first blood request.</p>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">Create your first blood request below.</p>
                 <button
-                  onClick={() => navigate('/receiver-home')}
+                  onClick={() => navigate('/create-request')}
                   className="mt-2 h-10 px-6 bg-primary text-on-primary rounded-full font-label-lg text-label-lg font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[18px]">add_alert</span>
