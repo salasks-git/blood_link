@@ -79,6 +79,14 @@ const Auth = () => {
 
           {/* Top bar */}
           <div className="flex items-center mb-space-lg relative">
+            <button
+              aria-label="Go back to landing page"
+              className="absolute left-0 flex items-center justify-center w-10 h-10 -ml-2 rounded-full text-on-surface hover:bg-surface-container active:bg-surface-container-high transition-colors"
+              onClick={() => window.location.href = '/'}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+            </button>
             <div className="w-full flex justify-center items-center">
               <span className="font-title-md text-title-md text-on-surface font-semibold">
                 Authentication

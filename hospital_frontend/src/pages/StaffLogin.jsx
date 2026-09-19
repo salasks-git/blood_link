@@ -73,7 +73,15 @@ const StaffLogin = () => {
             {/* Main Authentication Container */}
             <div className="w-full bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden">
               {/* Portal Brand Band */}
-              <div className="bg-surface-container-low p-space-xl flex items-start justify-between">
+              <div className="bg-surface-container-low p-space-xl flex items-start justify-between relative">
+                <button
+                  aria-label="Go back to landing page"
+                  className="absolute top-4 right-4 flex items-center justify-center w-10 h-10 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container transition-colors"
+                  onClick={() => window.location.href = '/'}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[24px]">close</span>
+                </button>
                 <div className="flex flex-col gap-space-xs">
                   <div className="flex items-center gap-space-sm">
                     <div className="w-7 h-7 bg-primary-container text-on-primary flex items-center justify-center rounded">
