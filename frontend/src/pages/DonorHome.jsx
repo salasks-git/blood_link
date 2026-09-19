@@ -11,6 +11,21 @@ const DonorHome = () => {
   const [pastDonations, setPastDonations] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const toggleAvailability = async () => {
+    const newVal = !available;
+    setAvailable(newVal);
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}/availability`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ available: newVal })
+      });
+    } catch (e) {
+      console.error(e);
+      setAvailable(!newVal); // revert on error
+    }
+  };
+
   useEffect(() => {
     if (!userId) { navigate('/'); return; }
     const fetchProfile = async () => {
@@ -19,7 +34,10 @@ const DonorHome = () => {
         if (res.ok) {
           const data = await res.json();
           setDonorName(data.name || 'Donor');
-          if (data.donorInfo) setBloodGroup(data.donorInfo.bloodGroup || '');
+          if (data.donorInfo) {
+            setBloodGroup(data.donorInfo.bloodGroup || '');
+            setAvailable(data.donorInfo.available === true || data.donorInfo.available === 1);
+          }
         }
       } catch (_) {}
     };
@@ -117,7 +135,7 @@ const DonorHome = () => {
                   aria-checked={available}
                   aria-label="Toggle availability status"
                   className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 shadow-inner ${available ? 'bg-tertiary' : 'bg-surface-variant'}`}
-                  onClick={() => setAvailable(a => !a)}
+                  onClick={toggleAvailability}
                   role="switch"
                 >
                   <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${available ? 'translate-x-7' : 'translate-x-1'}`} />
@@ -131,8 +149,8 @@ const DonorHome = () => {
                     <span className="material-symbols-outlined text-[20px]">favorite</span>
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-bold">Lives Impacted</span>
-                    <span className="text-2xl text-on-surface font-black">9</span>
+                    <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-bold">Times Donated</span>
+                    <span className="text-2xl text-on-surface font-black">{pastDonations.length}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

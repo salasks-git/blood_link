@@ -528,6 +528,16 @@ app.put('/api/users/:id', (req, res) => {
     res.json({ success: true, message: 'Profile updated' });
 });
 
+// Update Donor Availability Status
+app.put('/api/users/:id/availability', (req, res) => {
+    const userId = req.params.id;
+    const { available } = req.body;
+    db.run(`UPDATE donors SET available = ? WHERE userId = ?`, [available === true ? true : false, userId], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, changes: this.changes });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
