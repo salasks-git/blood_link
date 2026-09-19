@@ -152,6 +152,7 @@
               <p class="font-body-md text-body-md text-secondary mt-0.5">Key operational metrics and system status summary</p>
             </div>
             <div class="flex items-center gap-space-sm flex-wrap">
+              <button class="h-8 px-space-md bg-error/10 hover:bg-error/20 border border-error/20 text-error font-label-md text-label-md rounded-DEFAULT flex items-center gap-space-xs transition-colors" onclick="clearDatabase()" type="button"><span class="material-symbols-outlined text-[16px]">delete_forever</span><span>Clear Database</span></button>
               <button class="h-8 px-space-md bg-surface-container-lowest border border-surface-container-high hover:border-secondary text-on-surface font-label-md text-label-md rounded-DEFAULT flex items-center gap-space-xs transition-colors" onclick="navigateTo('audit')" type="button"><span class="material-symbols-outlined text-[16px] text-secondary">history</span><span>View Audit Log</span></button>
               <button class="h-8 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded-DEFAULT flex items-center gap-space-xs transition-colors" onclick="navigateTo('hospitals')" type="button"><span class="material-symbols-outlined text-[16px]">add_circle</span><span>Add Hospital</span></button>
             </div>
@@ -676,6 +677,26 @@ function renderHospitals() {
         console.error('Failed to reject:', e);
       }
     }));
+}
+
+// CLEAR DATABASE (TESTING)
+async function clearDatabase() {
+  if (!confirm("⚠️ WARNING: This will permanently delete ALL users, donors, requests, and history from the database. This action cannot be undone.\n\nAre you absolutely sure you want to proceed?")) {
+    return;
+  }
+  
+  try {
+    const res = await fetch(API+'/admin/clear-db', { method: 'POST' });
+    if (res.ok) {
+      alert("✅ Database cleared successfully! The dashboard will now refresh.");
+      loadAll();
+    } else {
+      alert("❌ Failed to clear database. Ensure the backend is updated.");
+    }
+  } catch (e) {
+    console.error(e);
+    alert("❌ Network error while clearing database.");
+  }
 }
 
 // INIT

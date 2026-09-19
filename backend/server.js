@@ -219,6 +219,20 @@ app.get('/api/admin/requests', (req, res) => {
     });
 });
 
+// Clear entire database (TESTING ONLY)
+app.post('/api/admin/clear-db', (req, res) => {
+    db.serialize(() => {
+        db.run('DELETE FROM requests');
+        db.run('DELETE FROM donors');
+        db.run('DELETE FROM user_locations');
+        db.run('DELETE FROM requests_log');
+        db.run('DELETE FROM users');
+        // Reset auto-increment counters
+        db.run('DELETE FROM sqlite_sequence');
+        res.json({ message: 'All database tables cleared successfully' });
+    });
+});
+
 // Update User Role
 app.patch('/api/users/:id/role', (req, res) => {
     const { id } = req.params;
