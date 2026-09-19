@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReceiverBottomNav from '../components/ReceiverBottomNav';
 
 const ReceiverRequests = () => {
   const navigate = useNavigate();
@@ -171,8 +170,6 @@ const ReceiverRequests = () => {
 
         </div>
       </main>
-
-      <ReceiverBottomNav />
     </div>
   );
 };

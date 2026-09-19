@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReceiverBottomNav from '../components/ReceiverBottomNav';
 
 const ReceiverHome = () => {
   const navigate = useNavigate();
