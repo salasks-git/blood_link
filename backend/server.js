@@ -596,7 +596,16 @@ app.post('/api/hospital/auth/login', (req, res) => {
             return res.status(403).json({ error: 'Account pending admin approval' });
         }
 
-        res.json({ id: staff.id, hospitalName: staff.hospitalName, role: staff.role, hospitalId: staff.hospitalId, locality: staff.locality, latitude: staff.latitude, longitude: staff.longitude, status: staff.status });
+        res.json({
+            id: staff.id,
+            hospitalName: staff.hospitalname || staff.hospitalName,
+            role: staff.role,
+            hospitalId: staff.hospitalid || staff.hospitalId,
+            locality: staff.locality,
+            latitude: staff.latitude,
+            longitude: staff.longitude,
+            status: staff.status
+        });
     });
 });
 
@@ -613,13 +622,13 @@ app.get('/api/hospital/location', (req, res) => {
 
 // Hospital: Set Location
 app.put('/api/hospital/location', (req, res) => {
-    const { hospitalId, latitude, longitude } = req.body;
+    const { hospitalId, latitude, longitude, locality } = req.body;
     if (!hospitalId || !latitude || !longitude) {
         return res.status(400).json({ error: 'hospitalId, latitude, and longitude are required' });
     }
     db.run(
-        `UPDATE hospital_staff SET latitude = ?, longitude = ? WHERE hospitalId = ?`,
-        [latitude, longitude, hospitalId],
+        `UPDATE hospital_staff SET latitude = ?, longitude = ?, locality = COALESCE(?, locality) WHERE hospitalId = ?`,
+        [latitude, longitude, locality || null, hospitalId],
         function (err) {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ success: true, changes: this.changes });

@@ -8,12 +8,13 @@ const HospitalProfile = () => {
   const navigate = useNavigate();
   const hospitalName = localStorage.getItem('hospitalName') || 'Hospital';
   const hospitalId = localStorage.getItem('hospitalId') || '';
-  const locality = localStorage.getItem('hospitalLocality') || 'Unknown';
   const role = localStorage.getItem('hospitalRole') || 'hospital_admin';
 
-  const [savedLocation, setSavedLocation] = useState(null); // { latitude, longitude, locality }
+  const [savedLocation, setSavedLocation] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [editingLocation, setEditingLocation] = useState(false);
+  // Keep locality in state so it updates live after saving
+  const [locality, setLocality] = useState(localStorage.getItem('hospitalLocality') || 'Global');
 
   // Fetch saved location on mount
   useEffect(() => {
@@ -23,18 +24,41 @@ const HospitalProfile = () => {
       .then(data => {
         if (data.latitude && data.longitude) {
           setSavedLocation(data);
+          if (data.locality) {
+            setLocality(data.locality);
+            localStorage.setItem('hospitalLocality', data.locality);
+          }
         }
       })
       .catch(() => {})
       .finally(() => setLoadingLocation(false));
   }, [hospitalId]);
 
-  const handleLocationSaved = () => {
-    // Refresh saved location and close editor
-    fetch(`${API}/api/hospital/location?hospitalId=${encodeURIComponent(hospitalId)}`)
-      .then(r => r.json())
-      .then(data => { if (data.latitude) setSavedLocation(data); })
-      .catch(() => {});
+  const handleLocationSaved = (savedData) => {
+    if (savedData) {
+      setSavedLocation({
+        latitude: savedData.lat,
+        longitude: savedData.lng,
+        locality: savedData.locality,
+      });
+      if (savedData.locality) {
+        localStorage.setItem('hospitalLocality', savedData.locality);
+        setLocality(savedData.locality);
+      }
+    } else {
+      fetch(`${API}/api/hospital/location?hospitalId=${encodeURIComponent(hospitalId)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.latitude) {
+            setSavedLocation(data);
+            if (data.locality) {
+              localStorage.setItem('hospitalLocality', data.locality);
+              setLocality(data.locality);
+            }
+          }
+        })
+        .catch(() => {});
+    }
     setEditingLocation(false);
   };
 

@@ -218,12 +218,13 @@ const SetLocationMap = ({ hospitalId, onLocationSaved, initialLocation, onChange
           hospitalId,
           latitude: position.lat,
           longitude: position.lng,
+          locality: placeName !== 'Fetching address...' && placeName !== 'No location selected' ? placeName : null,
         }),
       });
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
-        if (onLocationSaved) onLocationSaved();
+        if (onLocationSaved) onLocationSaved({ lat: position.lat, lng: position.lng, locality: placeName });
       }
     } catch (err) {
       console.error('Failed to save location', err);
