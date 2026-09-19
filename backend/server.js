@@ -103,6 +103,7 @@ db.serialize(() => {
     db.run(`ALTER TABLE requests ADD COLUMN latitude REAL`, () => { });
     db.run(`ALTER TABLE requests ADD COLUMN longitude REAL`, () => { });
     db.run(`ALTER TABLE requests ADD COLUMN donorId INTEGER`, () => { }); // tracks which donor accepted
+    db.run(`ALTER TABLE requests ADD COLUMN hospitalId TEXT`, () => { }); // FK to hospital_staff.hospitalId for reliable coord lookup
     db.run(`ALTER TABLE donors ADD COLUMN locality TEXT`, () => { });
     db.run(`ALTER TABLE hospital_staff ADD COLUMN locality TEXT`, () => { });
     db.run(`ALTER TABLE users ADD COLUMN password TEXT`, () => { });
@@ -296,25 +297,41 @@ app.get('/api/requests/for-donor/:userId', (req, res) => {
 
             db.all(
                 `SELECT requests.*, users.name AS requesterName, users.phone AS requesterPhone,
-                 COALESCE(requests.latitude, hospital_staff.latitude) as hospLat, 
-                 COALESCE(requests.longitude, hospital_staff.longitude) as hospLon
-                 FROM requests 
+                 COALESCE(
+                     requests.latitude,
+                     hs_by_id.latitude,
+                     hs_by_name.latitude
+                 ) as hospLat,
+                 COALESCE(
+                     requests.longitude,
+                     hs_by_id.longitude,
+                     hs_by_name.longitude
+                 ) as hospLon
+                 FROM requests
                  LEFT JOIN users ON requests.userId = users.id
-                 LEFT JOIN hospital_staff ON requests.hospital = hospital_staff.hospitalName
+                 LEFT JOIN hospital_staff hs_by_id   ON requests.hospitalId = hs_by_id.hospitalId
+                 LEFT JOIN hospital_staff hs_by_name ON requests.hospital   = hs_by_name.hospitalName
                  WHERE requests.bloodGroup = ? AND requests.status = 'searching'
                  ORDER BY requests.createdAt DESC`,
                 [donor.bloodGroup],
                 (err2, rows) => {
                     if (err2) return res.status(500).json({ error: err2.message });
 
-                    // Filter rows by distance
+                    // Filter rows by urgency-based radius.
+                    // Each request can have a different urgency level, so radius is computed per-row.
+                    // If donor has no GPS location, show all requests (degraded mode).
                     let filteredRows = rows;
                     if (loc && loc.latitude && loc.longitude) {
-                        const radius = donor.radius || 15;
                         filteredRows = rows.filter(r => {
-                            if (!r.hospLat || !r.hospLon) return true; // Include if hospital has no location
-                            const dist = getDistanceFromLatLonInKm(r.hospLat, r.hospLon, loc.latitude, loc.longitude);
-                            return dist <= radius;
+                            if (!r.hospLat || !r.hospLon) return true; // include if hospital has no location
+                            const searchRadius = getSearchRadiusKm(r.urgency);
+                            const dist = getDistanceFromLatLonInKm(
+                                parseFloat(r.hospLat), parseFloat(r.hospLon),
+                                parseFloat(loc.latitude), parseFloat(loc.longitude)
+                            );
+                            r.distanceKm = Math.round(dist * 10) / 10;
+                            r.searchRadiusKm = searchRadius;
+                            return dist <= searchRadius;
                         });
                     }
 
@@ -338,28 +355,60 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     return d;
 }
 
+/**
+ * Returns the donor search radius (km) based on request urgency level.
+ * Handles both user-frontend values (immediate/24h/scheduled)
+ * and hospital-frontend values (STAT/URGENT/ROUTINE).
+ *
+ * low / scheduled / ROUTINE  → 10 km
+ * medium / 24h / URGENT      → 20 km
+ * emergency / immediate/STAT → 40 km
+ */
+function getSearchRadiusKm(urgency) {
+    const u = (urgency || '').toLowerCase();
+    if (u === 'immediate' || u === 'stat' || u === 'emergency') return 40;
+    if (u === 'urgent' || u === '24h' || u === 'medium') return 20;
+    return 10; // scheduled / routine / low / default
+}
+
 // Notify matching donors for a request
 app.post('/api/requests/:id/notify-donors', (req, res) => {
     const requestId = req.params.id;
-    // Get the request and the hospital coordinates
+    // Get the request and the hospital coordinates.
+    // Prefer coordinates already stored on the request (copied at creation time).
+    // Fallback 1: JOIN on hospitalId (reliable FK).
+    // Fallback 2: JOIN on hospital name (legacy, fragile).
     db.get(`
-        SELECT requests.*, 
+        SELECT requests.*,
         requests.bloodGroup AS "bloodGroup",
         requests.hospital AS "hospital",
+        requests.urgency AS "urgency",
         requests.units AS "units",
-        COALESCE(requests.latitude, hospital_staff.latitude) as "hospLat", 
-        COALESCE(requests.longitude, hospital_staff.longitude) as "hospLon" 
-        FROM requests 
-        LEFT JOIN hospital_staff ON requests.hospital = hospital_staff.hospitalName
+        COALESCE(
+            requests.latitude,
+            hs_by_id.latitude,
+            hs_by_name.latitude
+        ) as "hospLat",
+        COALESCE(
+            requests.longitude,
+            hs_by_id.longitude,
+            hs_by_name.longitude
+        ) as "hospLon"
+        FROM requests
+        LEFT JOIN hospital_staff hs_by_id   ON requests.hospitalId = hs_by_id.hospitalId
+        LEFT JOIN hospital_staff hs_by_name ON requests.hospital   = hs_by_name.hospitalName
         WHERE requests.id = ?
     `, [requestId], (err, request) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!request) return res.status(404).json({ error: 'Request not found' });
 
+        // Determine search radius from urgency level
+        const searchRadius = getSearchRadiusKm(request.urgency);
+
         // Get donors and their latest location
         db.all(
-            `SELECT donors.*, users.name, users.phone, 
-                (SELECT latitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lat,
+            `SELECT donors.*, users.name, users.phone,
+                (SELECT latitude  FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lat,
                 (SELECT longitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lon
              FROM donors
              JOIN users ON donors.userId = users.id
@@ -368,19 +417,26 @@ app.post('/api/requests/:id/notify-donors', (req, res) => {
             (err2, allDonors) => {
                 if (err2) return res.status(500).json({ error: err2.message });
 
-                // Filter by distance if hospital has coordinates
+                // Filter donors by urgency-based search radius.
+                // If hospital coordinates are not available, include all donors (degraded mode).
                 let notifiedDonors = allDonors;
                 if (request.hospLat && request.hospLon) {
                     notifiedDonors = allDonors.filter(donor => {
-                        if (!donor.lat || !donor.lon) return false; // skip if donor has no location
-                        const dist = getDistanceFromLatLonInKm(request.hospLat, request.hospLon, donor.lat, donor.lon);
-                        return dist <= (donor.radius || 15); // Default to 15km if not set
+                        if (!donor.lat || !donor.lon) return false; // skip donors with no GPS
+                        const dist = getDistanceFromLatLonInKm(
+                            parseFloat(request.hospLat), parseFloat(request.hospLon),
+                            parseFloat(donor.lat), parseFloat(donor.lon)
+                        );
+                        donor.distanceKm = Math.round(dist * 10) / 10;
+                        return dist <= searchRadius;
                     });
                 }
 
                 res.json({
                     requestId,
                     bloodGroup: request.bloodGroup,
+                    urgency: request.urgency,
+                    searchRadiusKm: searchRadius,
                     notifiedCount: notifiedDonors.length,
                     donors: notifiedDonors
                 });
@@ -786,6 +842,8 @@ app.get('/api/hospital/requests/:id/detail', (req, res) => {
 });
 
 // Hospital: Create a blood request (stores patientName directly)
+// The hospital's coordinates are copied from the staff record server-side so
+// the frontend does not need to send them — this ensures coord lookup is always reliable.
 app.post('/api/hospital/requests', (req, res) => {
     const { bloodGroup, units, urgency, patientName, hospitalId, latitude, longitude } = req.body;
     if (!bloodGroup || !units || !urgency) {
@@ -799,12 +857,25 @@ app.post('/api/hospital/requests', (req, res) => {
         const locality = staff.locality;
         const status = 'searching';
 
+        // Use client-provided coords if available, otherwise fall back to staff record coords.
+        // Storing hospitalId enables a reliable FK join for future coord lookups.
+        const finalLat = latitude || staff.latitude || null;
+        const finalLon = longitude || staff.longitude || null;
+
         db.run(
-            `INSERT INTO requests (userId, patientName, bloodGroup, units, urgency, hospital, locality, status, latitude, longitude) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [patientName || null, bloodGroup, units, urgency, hospital, locality, status, latitude || null, longitude || null],
+            `INSERT INTO requests (userId, patientName, bloodGroup, units, urgency, hospital, locality, status, latitude, longitude, hospitalId)
+             VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [patientName || null, bloodGroup, units, urgency, hospital, locality, status, finalLat, finalLon, hospitalId || null],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
-                res.json({ id: this.lastID, patientName, bloodGroup, units, urgency, hospital, locality, status, latitude, longitude });
+                res.json({
+                    id: this.lastID,
+                    patientName, bloodGroup, units, urgency,
+                    hospital, locality, status,
+                    latitude: finalLat, longitude: finalLon,
+                    hospitalId,
+                    searchRadiusKm: getSearchRadiusKm(urgency)
+                });
             }
         );
     });

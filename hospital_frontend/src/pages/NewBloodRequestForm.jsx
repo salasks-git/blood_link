@@ -25,6 +25,7 @@ const NewBloodRequestForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [successData, setSuccessData] = useState(null);
+  const [notifiedCount, setNotifiedCount] = useState(null);
   const [error, setError] = useState(null);
 
   const handleLogout = () => {
@@ -38,6 +39,7 @@ const NewBloodRequestForm = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       const payload = {
         patientName: formData.patientName,
@@ -56,7 +58,20 @@ const NewBloodRequestForm = () => {
       if (res.ok) {
         const data = await res.json();
         setSuccessData(data);
-        setError(null);
+
+        // Notify matching donors within the urgency-based radius
+        // (10 km for ROUTINE, 20 km for URGENT, 40 km for STAT)
+        try {
+          const notifyRes = await fetch(`${API}/api/requests/${data.id}/notify-donors`, {
+            method: 'POST'
+          });
+          if (notifyRes.ok) {
+            const notifyData = await notifyRes.json();
+            setNotifiedCount(notifyData.notifiedCount);
+          }
+        } catch (_) {
+          // Notification failure is non-fatal — request was still created
+        }
       } else {
         const errData = await res.json();
         setError(errData.error || 'Failed to submit request');
@@ -248,7 +263,12 @@ const NewBloodRequestForm = () => {
                 <span className="material-symbols-outlined text-primary text-[24px] shrink-0">check_circle</span>
                 <div className="flex flex-col gap-1">
                   <span className="font-label-md text-label-md uppercase font-bold tracking-wide">Request Transmitted Successfully</span>
-                  <p className="font-body-sm text-body-sm text-surface-container-high leading-snug">Order #BR-{successData.id} has been dispatched. Emergency cross-match sequence engaged.</p>
+                  <p className="font-body-sm text-body-sm text-surface-container-high leading-snug">
+                    Order #BR-{successData.id} dispatched.
+                    {notifiedCount !== null
+                      ? ` ${notifiedCount} ${successData.bloodGroup} donor${notifiedCount !== 1 ? 's' : ''} alerted within ${successData.searchRadiusKm} km.`
+                      : ' Emergency cross-match sequence engaged.'}
+                  </p>
                   <div className="flex gap-3 mt-2">
                     <button className="font-label-sm text-label-sm text-primary font-bold uppercase underline" onClick={() => navigate('/dashboard-home')}>View Dashboard</button>
                     <button className="font-label-sm text-label-sm text-surface-variant uppercase" onClick={() => setSuccessData(null)}>Dismiss</button>

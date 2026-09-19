@@ -50,7 +50,7 @@ const DonorHome = () => {
           const profile = await profileRes.json();
           const bg = profile.donorInfo?.bloodGroup;
           if (bg) {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests?status=accepted`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests?status=fulfilled`);
             if (res.ok) {
               const data = await res.json();
               setPastDonations(data.filter(r => r.bloodGroup === bg));
