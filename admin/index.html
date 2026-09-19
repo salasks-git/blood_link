@@ -794,13 +794,34 @@
             bloodGroup: donor ? (donor.bloodgroup || donor.bloodGroup || '-') : '-',
             location: (donor && donor.locality) ? donor.locality : 
                       (u.lat && u.lon ? `${parseFloat(u.lat).toFixed(4)}, ${parseFloat(u.lon).toFixed(4)}` : '-'),
+            lat: u.lat,
+            lon: u.lon,
             createdAt: u.createdat || u.createdAt
           };
         });
+        
         document.getElementById('users-total').textContent = allUsers.length;
         document.getElementById('users-donors').textContent = allUsers.filter(u => u.derivedRole === 'donor').length;
         document.getElementById('users-receivers').textContent = allUsers.filter(u => u.derivedRole === 'receiver').length;
         renderUsers();
+        
+        // Reverse geocode missing localities in background (with 1.1s delay to respect rate limit)
+        allUsers.forEach((u, i) => {
+          if (u.lat && u.lon && u.location.match(/^[0-9.-]+,\s*[0-9.-]+$/)) {
+             setTimeout(() => {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${u.lat}&lon=${u.lon}&zoom=10&email=admin@lifelink.com`)
+                  .then(r => r.json())
+                  .then(data => {
+                     if (data && data.address) {
+                        const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+                        const state = data.address.state || '';
+                        u.location = [city, state].filter(Boolean).join(', ') || (data.display_name ? data.display_name.split(',').slice(0, 2).join(',') : u.location);
+                        renderUsers();
+                     }
+                  }).catch(console.error);
+             }, i * 1100);
+          }
+        });
       } catch (e) {
         document.getElementById('users-tbody').innerHTML = '<tr><td colspan="5" class="py-6 px-space-md text-center text-secondary">Backend offline</td></tr>';
       }
