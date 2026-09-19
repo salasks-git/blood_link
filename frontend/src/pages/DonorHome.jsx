@@ -48,14 +48,14 @@ const DonorHome = () => {
         const profileRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`);
         if (profileRes.ok) {
           const profile = await profileRes.json();
-          const bg = profile.donorInfo?.bloodGroup;
+          const bg = profile.donorInfo ? (profile.donorInfo.bloodGroup || profile.donorInfo.bloodgroup) : null;
           if (bg) {
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests`);
             if (res.ok) {
               const data = await res.json();
               // Filter to show active/completed donations specifically accepted by this donor
               setPastDonations(data.filter(r => 
-                r.donorId === parseInt(userId, 10) && 
+                (r.donorId == userId || r.donorid == userId) && 
                 (r.status === 'accepted' || r.status === 'fulfilled')
               ));
             }
