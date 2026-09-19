@@ -439,12 +439,12 @@ async function loadOverview(){
     
     // Deduplicate donors by userid to show unique users
     const donorsMap = new Map();
-    donorsRaw.forEach(d => donorsMap.set(d.userid, d));
+    donorsRaw.forEach(d => donorsMap.set(d.userId || d.userid, d));
     const donors = Array.from(donorsMap.values());
 
     document.getElementById('stat-total-requests').textContent=requests.length;
     document.getElementById('stat-donors').textContent=donors.length;
-    const uids=new Set([...requests.map(r=>r.userid || r.userId),...donors.map(d=>d.userid)]);
+    const uids=new Set([...requests.map(r=>r.userId || r.userid),...donors.map(d=>d.userId || d.userid)]);
     document.getElementById('stat-users').textContent=uids.size;
     const bg={};donors.forEach(d=>{
       const group = d.bloodgroup || d.bloodGroup || 'Unknown';
