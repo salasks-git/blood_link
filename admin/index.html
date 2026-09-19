@@ -407,6 +407,7 @@ function signOut(){
 
 // NAVIGATION
 function navigateTo(page){
+  localStorage.setItem('admin_current_page', page);
   document.querySelectorAll('.nav-link').forEach(l=>{
     l.classList.remove('active');
     l.classList.add('text-secondary','hover:bg-surface-container-low','hover:text-on-surface');
@@ -572,7 +573,8 @@ document.querySelectorAll('.reject-btn').forEach(btn=>btn.addEventListener('clic
 if(localStorage.getItem('admin_auth')==='true'){
   document.getElementById('login-page').style.display='none';
   document.getElementById('dashboard-shell').classList.remove('hidden');
-  navigateTo('overview');
+  const savedPage = localStorage.getItem('admin_current_page') || 'overview';
+  navigateTo(savedPage);
   loadAll();
 }
 </script>
