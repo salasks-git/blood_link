@@ -437,7 +437,10 @@ async function loadOverview(){
     document.getElementById('stat-donors').textContent=donors.length;
     const uids=new Set([...requests.map(r=>r.userId),...donors.map(d=>d.userId)]);
     document.getElementById('stat-users').textContent=uids.size;
-    const bg={};donors.forEach(d=>{bg[d.bloodGroup]=(bg[d.bloodGroup]||0)+1;});
+    const bg={};donors.forEach(d=>{
+      const group = d.bloodGroup || d.bloodgroup || 'Unknown';
+      bg[group]=(bg[group]||0)+1;
+    });
     document.getElementById('stat-donors-bg').textContent=Object.entries(bg).map(([g,c])=>g+': '+c).join(', ')||'No donors yet';
     const tbody=document.getElementById('recent-requests-body');
     if(!requests.length){tbody.innerHTML='<tr><td colspan="5" class="py-4 px-space-md text-center text-secondary font-body-sm">No requests yet</td></tr>';return;}
@@ -445,7 +448,7 @@ async function loadOverview(){
       <tr class="hover:bg-surface-container-low transition-colors">
         <td class="py-space-sm px-space-md font-code-sm text-code-sm text-secondary whitespace-nowrap">${new Date(r.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
         <td class="py-space-sm px-space-md font-medium text-on-surface whitespace-nowrap">${r.hospital||'-'}</td>
-        <td class="py-space-sm px-space-md"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-primary-fixed text-on-primary-fixed-variant">${r.bloodGroup}</span></td>
+        <td class="py-space-sm px-space-md"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-primary-fixed text-on-primary-fixed-variant">${r.bloodGroup || r.bloodgroup || '-'}</span></td>
         <td class="py-space-sm px-space-md whitespace-nowrap"><span class="inline-flex items-center px-1.5 py-0.5 rounded-DEFAULT text-label-sm bg-surface-container border border-surface-container-high text-secondary">${r.status}</span></td>
         <td class="py-space-sm px-space-md whitespace-nowrap">${r.units} unit${r.units>1?'s':''}</td>
       </tr>`).join('');
@@ -465,7 +468,7 @@ async function loadUsers(){
     const donors=dRes.ok?await dRes.json():[];
     const requests=rRes.ok?await rRes.json():[];
     const map={};
-    donors.forEach(d=>{map[d.userId]={id:d.userId,name:d.name,phone:d.phone,role:'donor',bloodGroup:d.bloodGroup,createdAt:d.createdAt};});
+    donors.forEach(d=>{map[d.userId]={id:d.userId,name:d.name,phone:d.phone,role:'donor',bloodGroup:d.bloodGroup || d.bloodgroup || '-',createdAt:d.createdAt};});
     requests.forEach(r=>{if(!map[r.userId])map[r.userId]={id:r.userId,name:r.name,phone:r.phone,role:'receiver',bloodGroup:'-',createdAt:r.createdAt};});
     allUsers=Object.values(map);
     document.getElementById('users-total').textContent=allUsers.length;
@@ -521,7 +524,7 @@ function renderAudit(){
   const f=document.getElementById('audit-filter').value;
   const filtered=auditData.filter(r=>{
     const mt=f==='all'||r.status===f;
-    const ms=!q||(r.hospital||'').toLowerCase().includes(q)||r.bloodGroup.toLowerCase().includes(q)||r.status.toLowerCase().includes(q);
+    const ms=!q||(r.hospital||'').toLowerCase().includes(q)||(r.bloodGroup || r.bloodgroup || '').toLowerCase().includes(q)||r.status.toLowerCase().includes(q);
     return mt&&ms;
   });
   document.getElementById('audit-label').textContent='Showing '+filtered.length+' of '+auditData.length+' events';
@@ -536,7 +539,7 @@ function renderAudit(){
     <tr class="hover:bg-surface-container-low/50 transition-colors group">
       <td class="py-2.5 px-space-md whitespace-nowrap"><div class="flex flex-col"><span class="font-code-sm text-code-sm text-on-surface font-medium">${new Date(r.createdAt).toLocaleString()}</span><span class="font-label-sm text-[10px] text-secondary">${ago(r.createdAt)}</span></div></td>
       <td class="py-2.5 px-space-md">${badge(r.status)}</td>
-      <td class="py-2.5 px-space-md"><div class="flex flex-col"><span class="text-on-surface">Hospital: <strong class="font-medium">${r.hospital||'-'}</strong> - ${r.units} unit${r.units>1?'s':''} of <strong>${r.bloodGroup}</strong></span><span class="font-code-sm text-[11px] text-secondary">Urgency: ${r.urgency||'standard'} - Request #${r.id}</span></div></td>
+      <td class="py-2.5 px-space-md"><div class="flex flex-col"><span class="text-on-surface">Hospital: <strong class="font-medium">${r.hospital||'-'}</strong> - ${r.units} unit${r.units>1?'s':''} of <strong>${r.bloodGroup || r.bloodgroup || '-'}</strong></span><span class="font-code-sm text-[11px] text-secondary">Urgency: ${r.urgency||'standard'} - Request #${r.id}</span></div></td>
       <td class="py-2.5 px-space-md"><span class="inline-flex items-center px-1.5 py-0.5 rounded-DEFAULT text-label-sm ${r.status==='searching'?'bg-surface-container border border-surface-container-high text-secondary':'bg-surface-container text-tertiary'}">${r.status}</span></td>
     </tr>`).join('');
 }
