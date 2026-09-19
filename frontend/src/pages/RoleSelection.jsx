@@ -17,8 +17,18 @@ const RoleSelection = () => {
       return;
     }
 
-    // Save active role to localStorage ONLY — no DB write for role switching
+    // Save active role to localStorage AND persist to DB
     localStorage.setItem('activeRole', role);
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+    } catch (err) {
+      console.error('Failed to update role in DB:', err);
+      // Non-blocking — continue with navigation even if DB write fails
+    }
 
     if (role === 'receiver') {
       navigate('/receiver-home');
