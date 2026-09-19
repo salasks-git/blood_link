@@ -183,6 +183,15 @@ app.patch('/api/admin/hospitals/:id/approve', (req, res) => {
     });
 });
 
+app.delete('/api/admin/hospitals/:id', (req, res) => {
+    const id = req.params.id;
+    db.run(`DELETE FROM hospital_staff WHERE id = ?`, [id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Hospital not found' });
+        res.json({ message: 'Hospital removed successfully' });
+    });
+});
+
 app.get('/api/admin/users', (req, res) => {
     db.all(`SELECT id, name, phone, role, createdAt FROM users`, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
