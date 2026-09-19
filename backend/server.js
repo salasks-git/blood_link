@@ -259,7 +259,7 @@ app.get('/api/donors', (req, res) => {
     let query = `SELECT donors.*, users.name, users.phone FROM donors JOIN users ON donors.userId = users.id`;
     let params = [];
     if (bloodGroup) {
-        query += ` WHERE donors.bloodGroup = ? AND donors.available = 1`;
+        query += ` WHERE donors.bloodGroup = ? AND donors.available = true`;
         params.push(bloodGroup);
     }
     db.all(query, params, (err, rows) => {
@@ -345,7 +345,7 @@ app.post('/api/requests/:id/notify-donors', (req, res) => {
                 (SELECT longitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lon
              FROM donors
              JOIN users ON donors.userId = users.id
-             WHERE donors.bloodGroup = ? AND donors.available = 1`,
+             WHERE donors.bloodGroup = ? AND donors.available = true`,
             [request.bloodGroup],
             (err2, allDonors) => {
                 if (err2) return res.status(500).json({ error: err2.message });
@@ -644,9 +644,9 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
 
         let reqQuery = `SELECT COUNT(*) as activeRequests FROM requests WHERE status != 'fulfilled'`;
         let reqArgs = [];
-        let donQuery = `SELECT COUNT(*) as totalDonors FROM donors WHERE available = 1`;
+        let donQuery = `SELECT COUNT(DISTINCT COALESCE(userId, id)) as totalDonors FROM donors WHERE available = true`;
         let donArgs = [];
-        let critQuery = `SELECT COUNT(*) as criticalUnits FROM donors WHERE (bloodGroup = 'O-' OR bloodGroup = 'O Negative') AND available = 1`;
+        let critQuery = `SELECT COUNT(DISTINCT COALESCE(userId, id)) as criticalUnits FROM donors WHERE (bloodGroup = 'O-' OR bloodGroup = 'O Negative') AND available = true`;
         let critArgs = [];
 
         if (staff.role !== 'system_admin' && staff.locality) {
@@ -662,9 +662,9 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
                 db.get(critQuery, critArgs, (err, critResult) => {
                     if (err) return res.status(500).json({ error: err.message });
                     res.json({
-                        activeRequests: reqResult.activeRequests || 0,
-                        totalDonors: donorResult.totalDonors || 0,
-                        criticalReserveUnits: critResult.criticalUnits || 0
+                        activeRequests: reqResult.activeRequests || reqResult.activerequests || 0,
+                        totalDonors: donorResult.totalDonors || donorResult.totaldonors || 0,
+                        criticalReserveUnits: critResult.criticalUnits || critResult.criticalunits || 0
                     });
                 });
             });
@@ -798,7 +798,7 @@ app.get('/api/hospital/donors', (req, res) => {
         }
         if (available !== undefined) {
             query += ` AND donors.available = ?`;
-            params.push(available === 'true' ? 1 : 0);
+            params.push(available === 'true' ? true : false);
         }
         query += ` ORDER BY donors.createdAt DESC`;
 
