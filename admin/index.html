@@ -566,6 +566,7 @@
                       <th class="py-space-sm px-space-md">Phone</th>
                       <th class="py-space-sm px-space-md">Role</th>
                       <th class="py-space-sm px-space-md">Blood Group</th>
+                      <th class="py-space-sm px-space-md">Location</th>
                       <th class="py-space-sm px-space-md">Joined</th>
                     </tr>
                   </thead>
@@ -791,6 +792,7 @@
             phone: u.phone,
             derivedRole: role,
             bloodGroup: donor ? (donor.bloodgroup || donor.bloodGroup || '-') : '-',
+            location: donor && donor.locality ? donor.locality : '-',
             createdAt: u.createdat || u.createdAt
           };
         });
@@ -826,6 +828,7 @@
       <td class="py-space-sm px-space-md font-code-sm text-[12px] text-secondary">${u.phone || '-'}</td>
       <td class="py-space-sm px-space-md">${roleBadge}</td>
       <td class="py-space-sm px-space-md font-label-sm text-label-sm">${u.bloodGroup || '-'}</td>
+      <td class="py-space-sm px-space-md font-body-sm text-secondary">${u.location || '-'}</td>
       <td class="py-space-sm px-space-md font-code-sm text-[12px] text-secondary">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}</td>
     </tr>`;
       }).join('');
