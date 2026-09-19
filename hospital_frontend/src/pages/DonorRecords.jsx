@@ -36,7 +36,22 @@ const DonorRecords = () => {
       const res = await fetch(`${API}/api/hospital/donors?hospitalId=${hospitalId}`);
       if (res.ok) {
         const data = await res.json();
-        setDonors(data);
+        
+        // Deduplicate donors by userid to show unique users
+        const donorsMap = new Map();
+        data.forEach(d => {
+            const uid = d.userid || d.userId;
+            if (uid) {
+                // Keep the most recent record
+                if (!donorsMap.has(uid) || new Date(d.createdat || d.createdAt) > new Date(donorsMap.get(uid).createdat || donorsMap.get(uid).createdAt)) {
+                    donorsMap.set(uid, d);
+                }
+            } else {
+                // If no userid, just use its own id (e.g. manually added donors)
+                donorsMap.set('manual_' + d.id, d);
+            }
+        });
+        setDonors(Array.from(donorsMap.values()));
       }
     } catch (_) {} finally {
       setLoading(false);
@@ -97,16 +112,17 @@ const DonorRecords = () => {
     return donors.filter(d => {
       // Search
       const searchLower = search.toLowerCase();
+      const bloodGroup = d.bloodgroup || d.bloodGroup;
+      const userName = d.username || d.userName || d.name;
       const matchSearch = !search || 
-        (d.userName && d.userName.toLowerCase().includes(searchLower)) ||
-        (d.name && d.name.toLowerCase().includes(searchLower)) ||
-        d.bloodGroup?.toLowerCase().includes(searchLower);
+        (userName && userName.toLowerCase().includes(searchLower)) ||
+        (bloodGroup && bloodGroup.toLowerCase().includes(searchLower));
       
       if (!matchSearch) return false;
 
       // Filter pills
-      if (filter === 'O-') return d.bloodGroup === 'O-' || d.bloodGroup === 'O Negative';
-      if (filter === 'available-now') return d.available === 1;
+      if (filter === 'O-') return bloodGroup === 'O-' || bloodGroup === 'O Negative';
+      if (filter === 'available-now') return d.available === 1 || d.available === true;
       if (filter === 'eligible-today') return true; // Simplify for now
       return true;
     });
@@ -114,8 +130,11 @@ const DonorRecords = () => {
 
   const stats = useMemo(() => {
     const total = donors.length;
-    const universal = donors.filter(d => (d.bloodGroup === 'O-' || d.bloodGroup === 'O Negative') && d.available === 1).length;
-    const near = donors.filter(d => d.radius <= 5 && d.available === 1).length;
+    const universal = donors.filter(d => {
+        const bg = d.bloodgroup || d.bloodGroup;
+        return (bg === 'O-' || bg === 'O Negative') && (d.available === 1 || d.available === true);
+    }).length;
+    const near = donors.filter(d => d.distanceKm !== undefined && d.distanceKm <= 8 && (d.available === 1 || d.available === true)).length; // 8km is ~5 miles
     return { total, universal, near };
   }, [donors]);
 
@@ -251,9 +270,11 @@ const DonorRecords = () => {
                   </tr>
                 ) : (
                   filteredDonors.map(donor => {
-                    const name = donor.userName || donor.name || 'Unknown Donor';
+                    const name = donor.username || donor.userName || donor.name || 'Unknown Donor';
                     const initials = name.substring(0, 2).toUpperCase();
-                    const isAvailable = donor.available === 1;
+                    const isAvailable = donor.available === 1 || donor.available === true;
+                    const phone = donor.userphone || donor.userPhone || donor.phone || 'No phone';
+                    const bloodGroup = donor.bloodgroup || donor.bloodGroup || 'Unknown';
                     
                     return (
                       <tr key={donor.id} className="hover:bg-surface-container-low/70 transition-colors">
@@ -267,14 +288,14 @@ const DonorRecords = () => {
                               <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-secondary">
                                 <span>ID: #DN-{donor.id}</span>
                                 <span>·</span>
-                                <span>{donor.phone || 'No phone'}</span>
+                                <span>{phone}</span>
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="py-space-md px-space-md text-center">
-                          <span className={`inline-flex items-center justify-center w-12 py-1 font-data-metric text-data-metric font-bold ${donor.bloodGroup?.includes('O-') ? 'bg-primary-container text-on-primary' : 'bg-surface-container-highest text-on-surface'}`}>
-                            {donor.bloodGroup}
+                          <span className={`inline-flex items-center justify-center w-12 py-1 font-data-metric text-data-metric font-bold ${bloodGroup.includes('O-') ? 'bg-primary-container text-on-primary' : 'bg-surface-container-highest text-on-surface'}`}>
+                            {bloodGroup}
                           </span>
                         </td>
                         <td className="py-space-md px-space-md">
@@ -355,10 +376,10 @@ const DonorRecords = () => {
             <div className="p-space-md bg-surface-container-low flex flex-col gap-2">
               <div className="flex justify-between items-center">
                 <span className="font-label-sm text-label-sm text-secondary uppercase">Target Candidate</span>
-                <span className="px-2 py-0.5 bg-primary-container text-on-primary font-data-metric text-data-metric font-bold">{dispatchDonor.bloodGroup}</span>
+                <span className="px-2 py-0.5 bg-primary-container text-on-primary font-data-metric text-data-metric font-bold">{dispatchDonor.bloodgroup || dispatchDonor.bloodGroup}</span>
               </div>
-              <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">{dispatchDonor.userName || dispatchDonor.name}</span>
-              <span className="font-label-sm text-label-sm text-secondary">ID: #DN-{dispatchDonor.id} · Radius: {dispatchDonor.radius || '?'} miles</span>
+              <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">{dispatchDonor.username || dispatchDonor.userName || dispatchDonor.name}</span>
+              <span className="font-label-sm text-label-sm text-secondary">ID: #DN-{dispatchDonor.id} · Distance: {dispatchDonor.distanceKm !== undefined ? `${dispatchDonor.distanceKm.toFixed(1)} km` : (dispatchDonor.radius ? `${dispatchDonor.radius} miles` : '?')}</span>
             </div>
             <div className="flex flex-col gap-space-xs">
               <label className="font-label-sm text-label-sm text-secondary uppercase">Clinical Unit / Ward Destination</label>
