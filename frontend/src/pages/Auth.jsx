@@ -51,14 +51,16 @@ const Auth = () => {
 
         setLoading(false);
 
-        // Route based on localStorage activeRole (set by RoleSelection)
-        const activeRole = localStorage.getItem('activeRole');
-        if (activeRole === 'donor') {
+        // Use role from DB (returned by login API) — skip role selection for returning users
+        const dbRole = (data.role || '').toLowerCase();
+        if (dbRole === 'donor') {
+          localStorage.setItem('activeRole', 'donor');
           navigate('/donor-home');
-        } else if (activeRole === 'receiver') {
+        } else if (dbRole === 'receiver') {
+          localStorage.setItem('activeRole', 'receiver');
           navigate('/receiver-home');
         } else {
-          // No active role set yet — pick a role
+          // New user — no role chosen yet, let them pick
           navigate('/role-selection');
         }
       } else {
