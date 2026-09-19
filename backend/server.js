@@ -8,23 +8,23 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware — allow frontend origin (set FRONTEND_URL env var in production)
 const allowedOrigins = [
-  /^https:\/\/blood-link.*\.vercel\.app$/,     // any blood-link Vercel deployment (preview + prod)
-  'http://localhost:5173',                       // dev: user frontend
-  'http://localhost:5174',                       // dev: hospital frontend
+    /^https:\/\/blood-link.*\.vercel\.app$/,     // any blood-link Vercel deployment (preview + prod)
+    'http://localhost:5173',                       // dev: user frontend
+    'http://localhost:5174',                       // dev: hospital frontend
 ];
 if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-    const allowed = allowedOrigins.some(o =>
-      typeof o === 'string' ? o === origin : o.test(origin)
-    );
-    if (allowed) return callback(null, true);
-    return callback(new Error(`CORS: origin ${origin} not allowed`));
-  },
-  credentials: true
+    origin: (origin, callback) => {
+        // allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        const allowed = allowedOrigins.some(o =>
+            typeof o === 'string' ? o === origin : o.test(origin)
+        );
+        if (allowed) return callback(null, true);
+        return callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true
 }));
 
 app.use(express.json());
@@ -34,7 +34,7 @@ const db = require('./db');
 console.log('Connected to the PostgreSQL database.');
 // Initialize tables here
 db.serialize(() => {
-            db.run(`CREATE TABLE IF NOT EXISTS users (
+    db.run(`CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 phone TEXT UNIQUE,
                 password TEXT,
@@ -43,11 +43,11 @@ db.serialize(() => {
                 createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
             )`);
 
-            // Add locality column if not exists (sqlite ALTER TABLE syntax for simplicity)
-            // But we'll just redefine it with IF NOT EXISTS. If it already exists, sqlite won't complain.
-            // Actually, we'll try to alter table to add locality safely.
+    // Add locality column if not exists (sqlite ALTER TABLE syntax for simplicity)
+    // But we'll just redefine it with IF NOT EXISTS. If it already exists, sqlite won't complain.
+    // Actually, we'll try to alter table to add locality safely.
 
-            db.run(`CREATE TABLE IF NOT EXISTS requests (
+    db.run(`CREATE TABLE IF NOT EXISTS requests (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 userId INTEGER,
                 patientName TEXT,
@@ -61,7 +61,7 @@ db.serialize(() => {
                 FOREIGN KEY(userId) REFERENCES users(id)
             )`);
 
-            db.run(`CREATE TABLE IF NOT EXISTS donors (
+    db.run(`CREATE TABLE IF NOT EXISTS donors (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 userId INTEGER,
                 name TEXT,
@@ -74,7 +74,7 @@ db.serialize(() => {
                 FOREIGN KEY(userId) REFERENCES users(id)
             )`);
 
-            db.run(`CREATE TABLE IF NOT EXISTS user_locations (
+    db.run(`CREATE TABLE IF NOT EXISTS user_locations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 userId INTEGER,
                 latitude DECIMAL(10, 8) NOT NULL,
@@ -83,8 +83,8 @@ db.serialize(() => {
                 FOREIGN KEY(userId) REFERENCES users(id)
             )`);
 
-            // Hospital staff table for real authentication
-            db.run(`CREATE TABLE IF NOT EXISTS hospital_staff (
+    // Hospital staff table for real authentication
+    db.run(`CREATE TABLE IF NOT EXISTS hospital_staff (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 hospitalId TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
@@ -97,21 +97,21 @@ db.serialize(() => {
                 createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
             )`);
 
-            // Attempt to add locality columns in case tables already exist without them
-            db.run(`ALTER TABLE requests ADD COLUMN locality TEXT`, () => { });
-            db.run(`ALTER TABLE requests ADD COLUMN patientName TEXT`, () => { });
-            db.run(`ALTER TABLE requests ADD COLUMN latitude REAL`, () => { });
-            db.run(`ALTER TABLE requests ADD COLUMN longitude REAL`, () => { });
-            db.run(`ALTER TABLE requests ADD COLUMN donorId INTEGER`, () => { }); // tracks which donor accepted
-            db.run(`ALTER TABLE donors ADD COLUMN locality TEXT`, () => { });
-            db.run(`ALTER TABLE hospital_staff ADD COLUMN locality TEXT`, () => { });
-            db.run(`ALTER TABLE users ADD COLUMN password TEXT`, () => { });
-            db.run(`ALTER TABLE hospital_staff ADD COLUMN status TEXT DEFAULT 'pending'`, (err) => {
-                // If the column was just added successfully (or already existed), let's ensure existing accounts get approved
-                // Wait, running this every time might approve accounts that are actually pending.
-                // We'll just run it once.
-            });
-        });
+    // Attempt to add locality columns in case tables already exist without them
+    db.run(`ALTER TABLE requests ADD COLUMN locality TEXT`, () => { });
+    db.run(`ALTER TABLE requests ADD COLUMN patientName TEXT`, () => { });
+    db.run(`ALTER TABLE requests ADD COLUMN latitude REAL`, () => { });
+    db.run(`ALTER TABLE requests ADD COLUMN longitude REAL`, () => { });
+    db.run(`ALTER TABLE requests ADD COLUMN donorId INTEGER`, () => { }); // tracks which donor accepted
+    db.run(`ALTER TABLE donors ADD COLUMN locality TEXT`, () => { });
+    db.run(`ALTER TABLE hospital_staff ADD COLUMN locality TEXT`, () => { });
+    db.run(`ALTER TABLE users ADD COLUMN password TEXT`, () => { });
+    db.run(`ALTER TABLE hospital_staff ADD COLUMN status TEXT DEFAULT 'pending'`, (err) => {
+        // If the column was just added successfully (or already existed), let's ensure existing accounts get approved
+        // Wait, running this every time might approve accounts that are actually pending.
+        // We'll just run it once.
+    });
+});
 
 
 // Basic route
@@ -219,20 +219,6 @@ app.get('/api/admin/requests', (req, res) => {
     });
 });
 
-// Clear entire database (TESTING ONLY)
-app.post('/api/admin/clear-db', (req, res) => {
-    db.serialize(() => {
-        db.run('DELETE FROM requests');
-        db.run('DELETE FROM donors');
-        db.run('DELETE FROM user_locations');
-        db.run('DELETE FROM requests_log');
-        db.run('DELETE FROM users');
-        // Reset auto-increment counters
-        db.run('DELETE FROM sqlite_sequence');
-        res.json({ message: 'All database tables cleared successfully' });
-    });
-});
-
 // Update User Role
 app.patch('/api/users/:id/role', (req, res) => {
     const { id } = req.params;
@@ -252,7 +238,7 @@ app.post('/api/donors', (req, res) => {
     const { userId, bloodGroup, radius, available } = req.body;
     db.get(`SELECT id FROM donors WHERE userId = ?`, [userId], (err, existing) => {
         if (err) return res.status(500).json({ error: err.message });
-        
+
         if (existing) {
             db.run(
                 `UPDATE donors SET bloodGroup = ?, radius = ?, available = ? WHERE userId = ?`,
@@ -678,19 +664,19 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
         let reqArgs = [];
 
         if (staff.role !== 'system_admin') {
-            reqQuery += ` AND hospital = ?`; 
+            reqQuery += ` AND hospital = ?`;
             reqArgs.push(staff.hospitalname || staff.hospitalName);
         }
 
         db.get(reqQuery, reqArgs, (err, reqResult) => {
             if (err) return res.status(500).json({ error: err.message });
-            
+
             let donQuery = `SELECT donors.userId, donors.id, donors.bloodGroup, 
                                 (SELECT latitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lat,
                                 (SELECT longitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lon
                             FROM donors WHERE available = true`;
             let donArgs = [];
-            
+
             if (staff.role !== 'system_admin' && (!staff.latitude || !staff.longitude) && staff.locality) {
                 donQuery += ` AND donors.locality = ?`;
                 donArgs.push(staff.locality);
@@ -698,7 +684,7 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
 
             db.all(donQuery, donArgs, (err, rows) => {
                 if (err) return res.status(500).json({ error: err.message });
-                
+
                 let filteredDonors = rows;
                 if (staff.role !== 'system_admin' && staff.latitude && staff.longitude) {
                     filteredDonors = rows.filter(donor => {
@@ -707,7 +693,7 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
                         return dist <= 30;
                     });
                 }
-                
+
                 // Deduplicate logic just like DonorRecords.jsx
                 const donorsMap = new Map();
                 filteredDonors.forEach(d => {
@@ -719,7 +705,7 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
                     }
                 });
                 const uniqueDonors = Array.from(donorsMap.values());
-                
+
                 let totalDonors = uniqueDonors.length;
                 let criticalReserveUnits = uniqueDonors.filter(d => {
                     const bg = d.bloodgroup || d.bloodGroup;
@@ -868,7 +854,7 @@ app.get('/api/hospital/donors', (req, res) => {
 
         db.all(query, params, (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
-            
+
             let filteredDonors = rows;
             if (staff.role !== 'system_admin' && staff.latitude && staff.longitude) {
                 filteredDonors = rows.filter(donor => {
