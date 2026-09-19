@@ -275,7 +275,7 @@ app.get('/api/donors', (req, res) => {
     let query = `SELECT donors.*, users.name, users.phone FROM donors JOIN users ON donors.userId = users.id`;
     let params = [];
     if (bloodGroup) {
-        query += ` WHERE donors.bloodGroup = ? AND donors.available IN (1, '1', 'true')`;
+        query += ` WHERE donors.bloodGroup = ? AND donors.available = true`;
         params.push(bloodGroup);
     }
     db.all(query, params, (err, rows) => {
@@ -301,37 +301,38 @@ app.get('/api/requests/for-donor/:userId', (req, res) => {
             if (errLoc) return res.status(500).json({ error: errLoc.message });
 
             db.all(
-                `SELECT requests.*, users.name AS requesterName, users.phone AS requesterPhone,
+                `SELECT requests.*, users.name AS "requesterName", users.phone AS "requesterPhone",
                  COALESCE(
                      requests.latitude,
                      hs_by_id.latitude,
                      hs_by_name.latitude
-                 ) as hospLat,
+                 ) AS "hospLat",
                  COALESCE(
                      requests.longitude,
                      hs_by_id.longitude,
                      hs_by_name.longitude
-                 ) as hospLon
+                 ) AS "hospLon"
                  FROM requests
                  LEFT JOIN users ON requests.userId = users.id
                  LEFT JOIN hospital_staff hs_by_id   ON requests.hospitalId = hs_by_id.hospitalId
                  LEFT JOIN hospital_staff hs_by_name ON requests.hospital   = hs_by_name.hospitalName
                  WHERE requests.bloodGroup = ? AND requests.status = 'searching'
                  ORDER BY requests.createdAt DESC`,
-                [donor.bloodGroup],
+                [donor.bloodGroup || donor.bloodgroup],
                 (err2, rows) => {
                     if (err2) return res.status(500).json({ error: err2.message });
 
                     // Filter rows by urgency-based radius.
-                    // Each request can have a different urgency level, so radius is computed per-row.
-                    // If donor has no GPS location, show all requests (degraded mode).
                     let filteredRows = rows;
                     if (loc && loc.latitude && loc.longitude) {
                         filteredRows = rows.filter(r => {
-                            if (!r.hospLat || !r.hospLon) return true; // include if hospital has no location
+                            const lat = r.hospLat || r.hosplat;
+                            const lon = r.hospLon || r.hosplon;
+                            
+                            if (!lat || !lon) return true; // include if hospital has no location
                             const searchRadius = getSearchRadiusKm(r.urgency);
                             const dist = getDistanceFromLatLonInKm(
-                                parseFloat(r.hospLat), parseFloat(r.hospLon),
+                                parseFloat(lat), parseFloat(lon),
                                 parseFloat(loc.latitude), parseFloat(loc.longitude)
                             );
                             r.distanceKm = Math.round(dist * 10) / 10;
@@ -417,7 +418,7 @@ app.post('/api/requests/:id/notify-donors', (req, res) => {
                 (SELECT longitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lon
              FROM donors
              JOIN users ON donors.userId = users.id
-             WHERE donors.bloodGroup = ? AND donors.available IN (1, '1', 'true')`,
+             WHERE donors.bloodGroup = ? AND donors.available = true`,
             [request.bloodGroup],
             (err2, allDonors) => {
                 if (err2) return res.status(500).json({ error: err2.message });
@@ -425,11 +426,14 @@ app.post('/api/requests/:id/notify-donors', (req, res) => {
                 // Filter donors by urgency-based search radius.
                 // If hospital coordinates are not available, include all donors (degraded mode).
                 let notifiedDonors = allDonors;
-                if (request.hospLat && request.hospLon) {
+                const lat = request.hospLat || request.hosplat;
+                const lon = request.hospLon || request.hosplon;
+                
+                if (lat && lon) {
                     notifiedDonors = allDonors.filter(donor => {
                         if (!donor.lat || !donor.lon) return false; // skip donors with no GPS
                         const dist = getDistanceFromLatLonInKm(
-                            parseFloat(request.hospLat), parseFloat(request.hospLon),
+                            parseFloat(lat), parseFloat(lon),
                             parseFloat(donor.lat), parseFloat(donor.lon)
                         );
                         donor.distanceKm = Math.round(dist * 10) / 10;
