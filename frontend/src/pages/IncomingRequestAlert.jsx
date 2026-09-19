@@ -66,11 +66,11 @@ const IncomingRequestAlert = () => {
     setConsentReq(null);
     setActionState(s => ({ ...s, [req.id]: 'accepting' }));
     try {
-      // 'found' is the correct status when a donor accepts a request
+      // 'accepted' is the correct status to trigger UI updates across the system
       await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests/${req.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'found', donorId: parseInt(userId, 10) }),
+        body: JSON.stringify({ status: 'accepted', donorId: parseInt(userId, 10) }),
       });
       setActionState(s => ({ ...s, [req.id]: 'accepted' }));
     } catch {
