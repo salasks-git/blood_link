@@ -183,7 +183,7 @@ app.get('/api/admin/hospitals', (req, res) => {
 });
 
 app.get('/api/hospitals', (req, res) => {
-    db.all(`SELECT id, hospitalName, locality, latitude, longitude FROM hospital_staff WHERE role != 'system_admin' AND status = 'approved'`, [], (err, rows) => {
+    db.all(`SELECT id, hospitalName AS "hospitalName", locality, latitude, longitude FROM hospital_staff WHERE role != 'system_admin' AND status = 'approved'`, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
@@ -344,8 +344,11 @@ app.post('/api/requests/:id/notify-donors', (req, res) => {
     // Get the request and the hospital coordinates
     db.get(`
         SELECT requests.*, 
-        COALESCE(requests.latitude, hospital_staff.latitude) as hospLat, 
-        COALESCE(requests.longitude, hospital_staff.longitude) as hospLon 
+        requests.bloodGroup AS "bloodGroup",
+        requests.hospital AS "hospital",
+        requests.units AS "units",
+        COALESCE(requests.latitude, hospital_staff.latitude) as "hospLat", 
+        COALESCE(requests.longitude, hospital_staff.longitude) as "hospLon" 
         FROM requests 
         LEFT JOIN hospital_staff ON requests.hospital = hospital_staff.hospitalName
         WHERE requests.id = ?
