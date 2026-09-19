@@ -183,7 +183,7 @@ app.get('/api/admin/hospitals', (req, res) => {
 });
 
 app.get('/api/hospitals', (req, res) => {
-    db.all(`SELECT id, hospitalName, locality FROM hospital_staff WHERE role != 'system_admin' AND status = 'approved'`, [], (err, rows) => {
+    db.all(`SELECT id, hospitalName, locality, latitude, longitude FROM hospital_staff WHERE role != 'system_admin' AND status = 'approved'`, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });

@@ -29,7 +29,8 @@ const CreateRequest = () => {
   const navigate = useNavigate();
   const [selectedBlood, setSelectedBlood] = useState('O+');
   const [urgency, setUrgency] = useState('immediate');
-  const [hospital, setHospital] = useState('City Central Hospital, Ward 4');
+  const [hospital, setHospital] = useState('');
+  const [customHospital, setCustomHospital] = useState('');
   const [position, setPosition] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [units, setUnits] = useState(2);
@@ -85,6 +86,20 @@ const CreateRequest = () => {
     const userId = localStorage.getItem('userId');
 
     try {
+      let finalLat = position ? position.lat : null;
+      let finalLng = position ? position.lng : null;
+      let finalHospital = hospital;
+
+      if (hospital === 'custom') {
+        finalHospital = customHospital;
+      } else {
+        const selectedHosp = hospitalsList.find(h => h.hospitalName === hospital);
+        if (selectedHosp && selectedHosp.latitude && selectedHosp.longitude) {
+          finalLat = selectedHosp.latitude;
+          finalLng = selectedHosp.longitude;
+        }
+      }
+
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -93,9 +108,9 @@ const CreateRequest = () => {
           bloodGroup: selectedBlood,
           units,
           urgency,
-          hospital,
-          latitude: position ? position.lat : null,
-          longitude: position ? position.lng : null
+          hospital: finalHospital,
+          latitude: finalLat,
+          longitude: finalLng
         })
       });
 
@@ -258,40 +273,59 @@ const CreateRequest = () => {
                   value={hospital}
                   onChange={e => setHospital(e.target.value)}
                 >
-                  <option value="" disabled>Select a hospital</option>
+                  <option value="" disabled>Select a hospital or custom location</option>
                   {hospitalsList.map((h, i) => (
                     <option key={h.id || i} value={h.hospitalName}>
                       {h.hospitalName} {h.locality ? `(${h.locality})` : ''}
                     </option>
                   ))}
+                  <option value="custom">Other / Custom Location</option>
                 </select>
                 <span className="material-symbols-outlined absolute right-3.5 text-on-surface-variant text-[20px] pointer-events-none">expand_more</span>
               </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant pl-1">Select an approved hospital for the request</p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant pl-1">
+                {hospital === 'custom' ? 'Specify a custom hospital and pin its location below' : 'Select an approved hospital (location automatically included)'}
+              </p>
             </div>
 
+            {/* Custom Hospital Input */}
+            {hospital === 'custom' && (
+              <div className="flex flex-col gap-space-xs -mt-2">
+                <input
+                  className="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-DEFAULT py-3.5 px-4 focus:outline-none focus:bg-surface-container transition-colors shadow-sm border border-transparent focus:border-primary/50"
+                  placeholder="Enter hospital name and room/ward"
+                  required
+                  type="text"
+                  value={customHospital}
+                  onChange={e => setCustomHospital(e.target.value)}
+                />
+              </div>
+            )}
+
             {/* Map Selector */}
-            <div className="flex flex-col gap-space-xs mt-space-sm z-0">
-              <label className="font-label-lg text-label-lg text-on-surface">Precise Location Pin</label>
-              <SetLocationMap pickerOnly={true} onChange={setPosition} onAddressChange={setSelectedAddress} />
-              {/* Address display box */}
-              {selectedAddress && (
-                <div className="flex items-start gap-3 mt-2 p-4 bg-surface-container-low border border-outline-variant/40 rounded-xl shadow-sm">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                    <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>location_on</span>
+            {hospital === 'custom' && (
+              <div className="flex flex-col gap-space-xs mt-space-sm z-0">
+                <label className="font-label-lg text-label-lg text-on-surface">Precise Location Pin</label>
+                <SetLocationMap pickerOnly={true} onChange={setPosition} onAddressChange={setSelectedAddress} />
+                {/* Address display box */}
+                {selectedAddress && (
+                  <div className="flex items-start gap-3 mt-2 p-4 bg-surface-container-low border border-outline-variant/40 rounded-xl shadow-sm">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                      <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>location_on</span>
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-label-xs text-label-xs text-secondary uppercase tracking-wider font-bold mb-0.5">Pinned Address</span>
+                      <span className="font-body-md text-body-md text-on-surface leading-snug">{selectedAddress}</span>
+                      {position && (
+                        <span className="font-body-xs text-body-xs text-on-surface-variant font-mono mt-1">
+                          {position.lat?.toFixed(5)}, {position.lng?.toFixed(5)}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-label-xs text-label-xs text-secondary uppercase tracking-wider font-bold mb-0.5">Pinned Address</span>
-                    <span className="font-body-md text-body-md text-on-surface leading-snug">{selectedAddress}</span>
-                    {position && (
-                      <span className="font-body-xs text-body-xs text-on-surface-variant font-mono mt-1">
-                        {position.lat?.toFixed(5)}, {position.lng?.toFixed(5)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Units Counter */}
             <div className="flex flex-col gap-space-xs">
