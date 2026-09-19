@@ -9,7 +9,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [placeName, setPlaceName] = useState('');
-  
+
   const [profile, setProfile] = useState({
     name: '',
     phone: '',
@@ -17,8 +17,6 @@ const Profile = () => {
     location: null,
     donorInfo: null
   });
-
-  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   useEffect(() => {
     if (!userId) {
@@ -138,7 +136,7 @@ const Profile = () => {
                   <input
                     className="w-full bg-transparent font-body-lg text-body-lg text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none"
                     value={profile.name}
-                    onChange={e => setProfile({...profile, name: e.target.value})}
+                    onChange={e => setProfile({ ...profile, name: e.target.value })}
                     type="text"
                   />
                 </div>
@@ -166,7 +164,7 @@ const Profile = () => {
                   <select
                     className="w-full bg-transparent font-body-lg text-body-lg text-on-surface focus:outline-none appearance-none"
                     value={profile.role}
-                    onChange={e => setProfile({...profile, role: e.target.value})}
+                    onChange={e => setProfile({ ...profile, role: e.target.value })}
                   >
                     <option value="donor">Donor</option>
                     <option value="receiver">Receiver</option>
@@ -174,36 +172,18 @@ const Profile = () => {
                 </div>
               </div>
 
-              {profile.role === 'donor' && (
-                <div className={`flex flex-col gap-space-sm mb-space-md ${profile.donorInfo?.bloodGroup ? 'opacity-70' : ''}`}>
+              {profile.role === 'donor' && profile.donorInfo?.bloodGroup && (
+                <div className="flex flex-col gap-space-sm mb-space-md opacity-70">
                   <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-                    Blood Group {profile.donorInfo?.bloodGroup ? '(Cannot be changed)' : ''}
+                    Blood Group (Cannot be changed)
                   </label>
-                  <div className="flex items-center w-full h-12 px-space-md rounded-full bg-surface-container-lowest shadow-sm border border-transparent focus-within:border-primary/50 transition-colors">
-                    {profile.donorInfo?.bloodGroup ? (
-                      // Locked — blood group already set
-                      <div className="flex items-center gap-2 w-full">
-                        <span className="material-symbols-outlined text-[18px] text-on-surface-variant">lock</span>
-                        <span className="font-body-lg text-body-lg text-on-surface">
-                          {profile.donorInfo.bloodGroup}
-                        </span>
-                      </div>
-                    ) : (
-                      // Not set yet — show dropdown
-                      <select
-                        className="w-full bg-transparent font-body-lg text-body-lg text-on-surface focus:outline-none appearance-none"
-                        value={profile.donorInfo?.bloodGroup || ''}
-                        onChange={e => setProfile({
-                          ...profile,
-                          donorInfo: { ...(profile.donorInfo || {}), bloodGroup: e.target.value }
-                        })}
-                      >
-                        <option value="">Select blood group</option>
-                        {bloodGroups.map(bg => (
-                          <option key={bg} value={bg}>{bg}</option>
-                        ))}
-                      </select>
-                    )}
+                  <div className="flex items-center w-full h-12 px-space-md rounded-full bg-surface-container-lowest shadow-sm border border-transparent">
+                    <div className="flex items-center gap-2 w-full">
+                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">lock</span>
+                      <span className="font-body-lg text-body-lg text-on-surface">
+                        {profile.donorInfo.bloodGroup}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -233,7 +213,7 @@ const Profile = () => {
                 ) : (
                   <p className="font-body-md text-on-surface-variant mb-2">No location saved.</p>
                 )}
-                
+
                 <button
                   type="button"
                   onClick={() => navigate('/donor-location')}
@@ -257,7 +237,7 @@ const Profile = () => {
                   <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
                 ) : 'Save Changes'}
               </button>
-              
+
               <button
                 type="button"
                 className="w-full h-12 flex items-center justify-center rounded-full border border-error text-error font-label-lg text-label-lg tracking-wide hover:bg-error/10 active:scale-[0.99] transition-all"
