@@ -654,10 +654,6 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
 
         let reqQuery = `SELECT COUNT(*) as activeRequests FROM requests WHERE status != 'fulfilled'`;
         let reqArgs = [];
-        let donQuery = `SELECT COUNT(DISTINCT COALESCE(userId, id)) as totalDonors FROM donors WHERE available = true`;
-        let donArgs = [];
-        let critQuery = `SELECT COUNT(DISTINCT COALESCE(userId, id)) as criticalUnits FROM donors WHERE (bloodGroup = 'O-' OR bloodGroup = 'O Negative') AND available = true`;
-        let critArgs = [];
 
         if (staff.role !== 'system_admin') {
             reqQuery += ` AND hospital = ?`; 
@@ -666,15 +662,40 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
 
         db.get(reqQuery, reqArgs, (err, reqResult) => {
             if (err) return res.status(500).json({ error: err.message });
-            db.get(donQuery, donArgs, (err, donorResult) => {
+            
+            let donQuery = `SELECT donors.bloodGroup, 
+                                (SELECT latitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lat,
+                                (SELECT longitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lon
+                            FROM donors WHERE available = true`;
+            let donArgs = [];
+            
+            if (staff.role !== 'system_admin' && (!staff.latitude || !staff.longitude) && staff.locality) {
+                donQuery += ` AND donors.locality = ?`;
+                donArgs.push(staff.locality);
+            }
+
+            db.all(donQuery, donArgs, (err, rows) => {
                 if (err) return res.status(500).json({ error: err.message });
-                db.get(critQuery, critArgs, (err, critResult) => {
-                    if (err) return res.status(500).json({ error: err.message });
-                    res.json({
-                        activeRequests: parseInt((reqResult && (reqResult.activeRequests || reqResult.activerequests)) || 0, 10),
-                        totalDonors: parseInt((donorResult && (donorResult.totalDonors || donorResult.totaldonors)) || 0, 10),
-                        criticalReserveUnits: parseInt((critResult && (critResult.criticalUnits || critResult.criticalunits)) || 0, 10)
+                
+                let filteredDonors = rows;
+                if (staff.role !== 'system_admin' && staff.latitude && staff.longitude) {
+                    filteredDonors = rows.filter(donor => {
+                        if (!donor.lat || !donor.lon) return false;
+                        const dist = getDistanceFromLatLonInKm(staff.latitude, staff.longitude, donor.lat, donor.lon);
+                        return dist <= 30;
                     });
+                }
+                
+                let totalDonors = filteredDonors.length;
+                let criticalReserveUnits = filteredDonors.filter(d => {
+                    const bg = d.bloodgroup || d.bloodGroup;
+                    return bg === 'O-' || bg === 'O Negative';
+                }).length;
+
+                res.json({
+                    activeRequests: parseInt((reqResult && (reqResult.activeRequests || reqResult.activerequests)) || 0, 10),
+                    totalDonors: totalDonors,
+                    criticalReserveUnits: criticalReserveUnits
                 });
             });
         });
