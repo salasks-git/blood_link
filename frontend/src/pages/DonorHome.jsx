@@ -50,10 +50,14 @@ const DonorHome = () => {
           const profile = await profileRes.json();
           const bg = profile.donorInfo?.bloodGroup;
           if (bg) {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests?status=fulfilled`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests`);
             if (res.ok) {
               const data = await res.json();
-              setPastDonations(data.filter(r => r.bloodGroup === bg));
+              // Filter to show active/completed donations specifically accepted by this donor
+              setPastDonations(data.filter(r => 
+                r.donorId === parseInt(userId, 10) && 
+                (r.status === 'accepted' || r.status === 'fulfilled')
+              ));
             }
           }
         }
@@ -166,9 +170,9 @@ const DonorHome = () => {
           </div>
           {/* Section Header */}
           <div className="flex items-center justify-between pt-space-xs">
-            <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">Past Donations</h3>
+            <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">My Donations</h3>
             <span className="font-label-sm text-label-sm text-on-surface-variant font-medium">
-              {loading ? 'Loading...' : `${pastDonations.length} Completed`}
+              {loading ? 'Loading...' : `${pastDonations.length} Tracked`}
             </span>
           </div>
 
@@ -182,7 +186,7 @@ const DonorHome = () => {
             {!loading && pastDonations.length === 0 && (
               <div className="flex flex-col items-center justify-center py-10 gap-3 text-on-surface-variant">
                 <span className="material-symbols-outlined text-[40px] text-outline">bloodtype</span>
-                <p className="font-body-md text-body-md text-center">No completed donations yet.<br />Accept a request to get started!</p>
+                <p className="font-body-md text-body-md text-center">No donations tracked yet.<br />Accept a request to get started!</p>
               </div>
             )}
             {!loading && pastDonations.map(d => (

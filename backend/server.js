@@ -484,6 +484,7 @@ app.get('/api/requests', (req, res) => {
                  requests.urgency AS "urgency",
                  requests.units AS "units",
                  requests.createdAt AS "createdAt",
+                 requests.donorId AS "donorId",
                  COALESCE(users.name, requests.hospital) AS "requesterName", 
                  users.phone AS "requesterPhone" 
                  FROM requests LEFT JOIN users ON requests.userId = users.id WHERE 1=1`;
