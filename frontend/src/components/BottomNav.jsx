@@ -6,25 +6,33 @@ const BottomNav = () => {
   const location = useLocation();
   const path = location.pathname;
 
-  // Only show on these three specific routes
-  const validRoutes = ['/donor-home', '/incoming-request', '/profile'];
   const userRole = localStorage.getItem('userRole');
 
-  if (!validRoutes.includes(path) || userRole === 'receiver') {
+  // Determine role-based paths
+  const homePath = userRole === 'receiver' ? '/receiver-home' : '/donor-home';
+  const requestsPath = userRole === 'receiver' ? '/create-request' : '/incoming-request';
+  const profilePath = '/profile';
+
+  // Only show on these three specific routes
+  const validRoutes = [homePath, requestsPath, profilePath];
+  if (!validRoutes.includes(path)) {
     return null;
   }
 
   // Determine active index for the slider pill
   let activeIndex = 0;
-  if (path === '/donor-home') activeIndex = 0;
-  else if (path === '/incoming-request') activeIndex = 1;
-  else if (path === '/profile') activeIndex = 2;
+  if (path === homePath) activeIndex = 0;
+  else if (path === requestsPath) activeIndex = 1;
+  else if (path === profilePath) activeIndex = 2;
+
+  // Determine icons
+  const requestsIcon = userRole === 'receiver' ? 'add_alert' : 'volunteer_activism';
 
   return (
     <nav className="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_16px_rgba(0,0,0,0.04)] border-t border-outline-variant/30">
       <div className="relative flex justify-around items-center h-16 px-2">
         {/* Dynamic Island / Sliding Pill Background */}
-        <div 
+        <div
           className="absolute top-2 bottom-2 w-1/3 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           style={{ transform: `translateX(${activeIndex * 100}%)`, left: '0' }}
         >
@@ -33,7 +41,7 @@ const BottomNav = () => {
 
         <button
           className={`relative z-10 flex flex-col items-center justify-center flex-1 gap-1 py-1 transition-colors duration-300 ${activeIndex === 0 ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
-          onClick={() => navigate('/donor-home')}
+          onClick={() => navigate(homePath)}
         >
           <div className="px-4 py-1 flex items-center justify-center">
             <span className="material-symbols-outlined text-[22px]" style={activeIndex === 0 ? { fontVariationSettings: "'FILL' 1" } : {}}>home</span>
@@ -43,17 +51,17 @@ const BottomNav = () => {
 
         <button
           className={`relative z-10 flex flex-col items-center justify-center flex-1 gap-1 py-1 transition-colors duration-300 ${activeIndex === 1 ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
-          onClick={() => navigate('/incoming-request')}
+          onClick={() => navigate(requestsPath)}
         >
           <div className="px-4 py-1 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[22px]" style={activeIndex === 1 ? { fontVariationSettings: "'FILL' 1" } : {}}>volunteer_activism</span>
+            <span className="material-symbols-outlined text-[22px]" style={activeIndex === 1 ? { fontVariationSettings: "'FILL' 1" } : {}}>{requestsIcon}</span>
           </div>
           <span className={`font-label-sm text-[11px] transition-all duration-300 ${activeIndex === 1 ? 'font-bold' : 'font-medium'}`}>Requests</span>
         </button>
 
         <button
           className={`relative z-10 flex flex-col items-center justify-center flex-1 gap-1 py-1 transition-colors duration-300 ${activeIndex === 2 ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
-          onClick={() => navigate('/profile')}
+          onClick={() => navigate(profilePath)}
         >
           <div className="px-4 py-1 flex items-center justify-center">
             <span className="material-symbols-outlined text-[22px]" style={activeIndex === 2 ? { fontVariationSettings: "'FILL' 1" } : {}}>account_circle</span>
