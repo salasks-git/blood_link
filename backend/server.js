@@ -301,7 +301,14 @@ app.get('/api/requests/for-donor/:userId', (req, res) => {
             if (errLoc) return res.status(500).json({ error: errLoc.message });
 
             db.all(
-                `SELECT requests.*, users.name AS "requesterName", users.phone AS "requesterPhone",
+                `SELECT requests.*, 
+                 requests.bloodGroup AS "bloodGroup",
+                 requests.hospital AS "hospital",
+                 requests.urgency AS "urgency",
+                 requests.units AS "units",
+                 requests.createdAt AS "createdAt",
+                 users.name AS "requesterName", 
+                 users.phone AS "requesterPhone",
                  COALESCE(
                      requests.latitude,
                      hs_by_id.latitude,
@@ -471,7 +478,15 @@ app.post('/api/requests', (req, res) => {
 app.get('/api/requests', (req, res) => {
     const status = req.query.status;
     const userId = req.query.userId;
-    let query = `SELECT requests.*, COALESCE(users.name, requests.hospital) as requesterName, users.phone as requesterPhone FROM requests LEFT JOIN users ON requests.userId = users.id WHERE 1=1`;
+    let query = `SELECT requests.*, 
+                 requests.bloodGroup AS "bloodGroup",
+                 requests.hospital AS "hospital",
+                 requests.urgency AS "urgency",
+                 requests.units AS "units",
+                 requests.createdAt AS "createdAt",
+                 COALESCE(users.name, requests.hospital) AS "requesterName", 
+                 users.phone AS "requesterPhone" 
+                 FROM requests LEFT JOIN users ON requests.userId = users.id WHERE 1=1`;
     let params = [];
     if (status) {
         query += ` AND requests.status = ?`;
@@ -493,7 +508,14 @@ app.get('/api/requests', (req, res) => {
 app.get('/api/requests/:id', (req, res) => {
     const { id } = req.params;
     db.get(
-        `SELECT requests.*, COALESCE(users.name, requests.hospital) as requesterName, users.phone as requesterPhone 
+        `SELECT requests.*, 
+         requests.bloodGroup AS "bloodGroup",
+         requests.hospital AS "hospital",
+         requests.urgency AS "urgency",
+         requests.units AS "units",
+         requests.createdAt AS "createdAt",
+         COALESCE(users.name, requests.hospital) AS "requesterName", 
+         users.phone AS "requesterPhone" 
          FROM requests LEFT JOIN users ON requests.userId = users.id 
          WHERE requests.id = ?`,
         [id],
