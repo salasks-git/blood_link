@@ -7,14 +7,18 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middleware — allow frontend origin (set FRONTEND_URL env var in production)
-const allowedOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL]
-  : ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'https://blood-link-ten-lilac.vercel.app',  // production
+  'http://localhost:5173',                      // dev: user frontend
+  'http://localhost:5174',                      // dev: hospital frontend
+];
+if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
 app.use(express.json());
 app.use('/admin', express.static(path.join(__dirname, '../admin')));
 
