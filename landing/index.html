@@ -1,188 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeLink — Emergency Blood Donation Network</title>
-    <style>
-        :root {
-            --primary: #ef4444;
-            --primary-hover: #dc2626;
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLink — Emergency Blood Donation Network</title>
+  <meta name="description" content="LifeLink connects donors, patients, and hospitals for emergency blood requests. Choose your portal to get started.">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(353,100%,76%,0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, hsla(353,100%,76%,0.05) 0px, transparent 50%);
-        }
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .container {
-            max-width: 1200px;
-            padding: 40px 20px;
-            text-align: center;
-        }
+    :root {
+      --brand-lime: #a2f376;
+      --brand-lavender: #a5affb;
+      --brand-dark: #101114;
+      --border-dark: #18191c;
+      --bg: #f6f8fb;
+      --text-dark: #0a0a0c;
+      --shadow-offset: 7px 9px 0px #18191c;
+      --shadow-hover: 11px 13px 0px #18191c;
+      --shadow-active: 3px 4px 0px #18191c;
+    }
 
-        .hero {
-            margin-bottom: 60px;
-            animation: fadeInDown 0.8s ease-out;
-        }
+    html, body {
+      height: 100%;
+    }
 
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            background: linear-gradient(to right, #fca5a5, #ef4444);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 0 auto;
-        }
+    /* ──────────────── Main Layout ──────────────── */
+    main {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+    }
 
-        .cards {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-            justify-content: center;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
-        }
+    /* ──────────────── Header ──────────────── */
+    header {
+      text-align: center;
+      animation: fadeDown 0.5s ease-out both;
+    }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 40px 32px;
-            width: 320px;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
+    h1 {
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text-dark);
+      line-height: 1;
+    }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-            transform-origin: left;
-        }
+    /* ──────────────── Legend ──────────────── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      animation: fadeDown 0.5s ease-out 0.1s both;
+    }
 
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-            border-color: rgba(239, 68, 68, 0.2);
-        }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-        .card:hover::before {
-            transform: scaleX(1);
-        }
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
 
-        .card-icon {
-            font-size: 48px;
-            margin-bottom: 24px;
-            background: rgba(239, 68, 68, 0.1);
-            width: 96px;
-            height: 96px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            color: var(--primary);
-            transition: transform 0.3s ease;
-        }
+    .dot-lime     { background: var(--brand-lime);     border: 1px solid rgba(0,0,0,0.15); }
+    .dot-lavender { background: var(--brand-lavender); border: 1px solid rgba(0,0,0,0.15); }
+    .dot-admin    { background: #fff; border: 2px solid var(--brand-lavender); }
 
-        .card:hover .card-icon {
-            transform: scale(1.1);
-        }
+    /* ──────────────── Cards Grid ──────────────── */
+    .cards {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      animation: fadeUp 0.6s ease-out 0.2s both;
+    }
 
-        .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
+    /* ──────────────── Neo Card ──────────────── */
+    .neo-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1 / 1;
+      border: 2px solid var(--border-dark);
+      border-radius: 36px;
+      padding: 1.5rem;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: var(--shadow-offset);
+      transition:
+        transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.18s ease-in-out;
+    }
 
-        .card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
+    .neo-card:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: var(--shadow-hover);
+    }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .neo-card:active {
+      transform: translate(4px, 5px);
+      box-shadow: var(--shadow-active);
+    }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    /* Card colors */
+    .card-lime     { background: var(--brand-lime); }
+    .card-lavender { background: var(--brand-lavender); }
+    .card-dark     { background: var(--brand-dark); color: #fff; }
 
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.5rem; }
-            .card { width: 100%; max-width: 360px; }
-        }
-    </style>
+    /* ──────────────── Card Icon ──────────────── */
+    .card-icon {
+      margin-bottom: 1.25rem;
+    }
+
+    .card-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke-width: 3.2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .card-dark .card-icon { color: #fff; }
+    .card-lime .card-icon,
+    .card-lavender .card-icon { color: var(--border-dark); }
+
+    /* ──────────────── Card Text ──────────────── */
+    .card-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0;
+    }
+
+    .card-lime .card-label,
+    .card-lavender .card-label { color: #3a3a3a; }
+    .card-dark .card-label     { color: #b0b0b0; }
+
+    .card-title {
+      font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .card-lime .card-title,
+    .card-lavender .card-title { color: var(--border-dark); }
+    .card-dark .card-title     { color: #fff; }
+
+    /* ──────────────── Animations ──────────────── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ──────────────── Responsive ──────────────── */
+    @media (max-width: 640px) {
+      .cards {
+        grid-template-columns: 1fr;
+        align-items: center;
+        justify-items: center;
+      }
+
+      .neo-card {
+        width: 100%;
+        max-width: 280px;
+      }
+
+      main { gap: 2rem; }
+    }
+
+    @media (min-width: 641px) and (max-width: 768px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .card-dark {
+        grid-column: 1 / -1;
+        aspect-ratio: auto;
+        padding: 2rem;
+        max-width: 320px;
+        justify-self: center;
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="hero">
-            <h1>LifeLink</h1>
-            <p>Select your portal to enter the emergency blood donation network and help save lives today.</p>
-        </div>
 
-        <div class="cards">
-            <!-- User / Donor Portal -->
-            <a href="/user/" class="card">
-                <div class="card-icon">🩸</div>
-                <h2>Donor / Patient</h2>
-                <p>Register to donate blood, respond to alerts, or request emergency blood units.</p>
-            </a>
+<main>
 
-            <!-- Hospital Portal -->
-            <a href="/hospital/" class="card">
-                <div class="card-icon">🏥</div>
-                <h2>Hospital Portal</h2>
-                <p>Manage blood inventory, broadcast emergency requests, and view verified donors.</p>
-            </a>
+  <!-- Header -->
+  <header>
+    <h1>LifeLink</h1>
+  </header>
 
-            <!-- Admin Panel -->
-            <a href="/admin/" class="card">
-                <div class="card-icon">🛡️</div>
-                <h2>Admin Panel</h2>
-                <p>Verify hospital registrations and oversee system analytics via the Trust Layer.</p>
-            </a>
-        </div>
+  <!-- Legend -->
+  <section class="legend" aria-label="Portal categories">
+    <div class="legend-item">
+      <span class="dot dot-lime"></span>
+      <span>Donor / Patient</span>
     </div>
+    <div class="legend-item">
+      <span class="dot dot-lavender"></span>
+      <span>Hospital</span>
+    </div>
+    <div class="legend-item">
+      <span class="dot dot-admin"></span>
+      <span>Admin</span>
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <div class="cards" role="list">
+
+    <!-- Donor / Patient Card -->
+    <a
+      href="/user/"
+      class="neo-card card-lime"
+      role="listitem"
+      aria-label="Enter Donor or Patient portal"
+    >
+      <div class="card-icon" aria-hidden="true">
+        <!-- Down-left arrow (inflow) -->
+        <svg viewBox="0 0 24 24">
+          <line x1="17" y1="7" x2="7" y2="17"></line>
+          <polyline points="17 17 7 17 7 7"></polyline>
+        </svg>
+      </div>
+      <span class="card-label">Inflow</span>
+      <h2 class="card-title">Donor / Patient</h2>
+    </a>
+
+    <!-- Hospital Portal Card -->
+    <a
+      href="/hospital/"
+      class="neo-card card-lavender"
+      role="listitem"
+      aria-label="Enter Hospital portal"
+    >
+      <div class="card-icon" aria-hidden="true">
+        <!-- Up-right arrow (outflow) -->
+        <svg viewBox="0 0 24 24">
+          <line x1="7" y1="17" x2="17" y2="7"></line>
+          <polyline points="7 7 17 7 17 17"></polyline>
+        </svg>
+      </div>
+      <span class="card-label">Outflow</span>
+      <h2 class="card-title">Hospital Portal</h2>
+    </a>
+
+    <!-- Admin Panel Card -->
+    <a
+      href="/admin/"
+      class="neo-card card-dark"
+      role="listitem"
+      aria-label="Enter Admin Panel"
+    >
+      <div class="card-icon" aria-hidden="true">
+        <!-- Converging arrows (net changes) -->
+        <svg viewBox="0 0 24 24">
+          <line x1="4" y1="12" x2="10" y2="12"></line>
+          <polyline points="7 9 10 12 7 15"></polyline>
+          <line x1="20" y1="12" x2="14" y2="12"></line>
+          <polyline points="17 9 14 12 17 15"></polyline>
+        </svg>
+      </div>
+      <span class="card-label">Net Changes</span>
+      <h2 class="card-title">Admin Panel</h2>
+    </a>
+
+  </div>
+</main>
+
 </body>
 </html>

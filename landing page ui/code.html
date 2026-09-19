@@ -1,0 +1,139 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>LifeLink</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Plus Jakarta Sans for clean geometric typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brandLime: '#a2f376',
+            brandLavender: '#a5affb',
+            brandDark: '#0e0e10',
+          },
+          boxShadow: {
+            'offset-black': '8px 10px 0px #18191c',
+            'offset-hover': '4px 5px 0px #18191c',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for precise card shadows & animations -->
+<style data-purpose="custom-card-styling">
+    .neo-card {
+      box-shadow: 7px 9px 0px #18191c;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease-in-out;
+    }
+    .neo-card:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 11px 13px 0px #18191c;
+    }
+    .neo-card:active {
+      transform: translate(4px, 5px);
+      box-shadow: 3px 4px 0px #18191c;
+    }
+  </style>
+</head>
+<body class="bg-[#f6f8fb] text-[#0f1115] font-sans min-h-screen flex flex-col justify-center items-center px-4 py-8 sm:p-6 selection:bg-brandLime selection:text-black antialiased">
+<!-- BEGIN: MainContent -->
+<main class="w-full max-w-5xl flex flex-col items-center justify-center space-y-8 sm:space-y-12 md:space-y-16" data-purpose="portal-selection-container">
+<!-- BEGIN: HeaderSection -->
+<header class="text-center" data-purpose="site-header">
+<h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-[#0a0a0c]">
+        LifeLink
+      </h1>
+</header>
+<!-- END: HeaderSection -->
+<!-- BEGIN: LegendIndicator -->
+<!-- Minimal category indicator dots inspired directly by the reference image -->
+<section class="flex flex-wrap items-center justify-center gap-4 sm:gap-7 text-xs sm:text-sm md:text-base font-semibold text-neutral-800" data-purpose="portal-indicators">
+<div class="flex items-center space-x-2.5">
+<span class="w-3.5 h-3.5 rounded-full bg-brandLime border border-neutral-900/20 shadow-sm inline-block"></span>
+<span class="">Donor / Patient</span>
+</div>
+<div class="flex items-center space-x-2.5">
+<span class="w-3.5 h-3.5 rounded-full bg-brandLavender border border-neutral-900/20 shadow-sm inline-block"></span>
+<span class="">Hospital</span>
+</div>
+<div class="flex items-center space-x-2.5">
+<span class="w-3.5 h-3.5 rounded-full border-2 border-brandLavender bg-white shadow-sm inline-block"></span>
+<span class="">Admin</span>
+</div>
+</section>
+<!-- END: LegendIndicator -->
+<!-- BEGIN: CardsGrid -->
+<div class="w-full flex flex-col sm:grid sm:grid-cols-3 items-center justify-center gap-6 sm:gap-6 lg:gap-8 max-w-4xl px-2" data-purpose="selection-cards">
+<!-- Card 1: Donor / Patient (Lime Green) -->
+<a aria-label="Enter Donor or Patient portal" class="neo-card flex flex-col items-center justify-center w-full max-w-[280px] sm:max-w-none aspect-square bg-brandLime border-2 border-[#18191c] rounded-[36px] p-6 text-center cursor-pointer select-none" href="#" role="button">
+<!-- Down-Left Arrow Icon matching reference -->
+<div aria-hidden="true" class="mb-5 text-[#18191c]">
+<svg class="w-9 h-9 stroke-[3.2] stroke-current fill-none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+<line x1="17" x2="7" y1="7" y2="17"></line>
+<polyline points="17 17 7 17 7 7"></polyline>
+</svg>
+</div>
+<!-- Card Label -->
+<span class="text-sm md:text-base font-semibold text-neutral-800 tracking-normal mb-1">
+          Inflow
+        </span>
+<!-- Main Title / Action text -->
+<h2 class="text-2xl md:text-[26px] font-bold text-[#18191c] tracking-tight">
+          Donor / Patient
+        </h2>
+</a>
+<!-- Card 2: Hospital Portal (Lavender / Periwinkle) -->
+<a aria-label="Enter Hospital portal" class="neo-card flex flex-col items-center justify-center w-full max-w-[280px] sm:max-w-none aspect-square bg-brandLavender border-2 border-[#18191c] rounded-[36px] p-6 text-center cursor-pointer select-none" href="#" role="button">
+<!-- Up-Right Arrow Icon matching reference -->
+<div aria-hidden="true" class="mb-5 text-[#18191c]">
+<svg class="w-9 h-9 stroke-[3.2] stroke-current fill-none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+<line x1="7" x2="17" y1="17" y2="7"></line>
+<polyline points="7 7 17 7 17 17"></polyline>
+</svg>
+</div>
+<!-- Card Label -->
+<span class="text-sm md:text-base font-semibold text-neutral-800 tracking-normal mb-1">
+          Outflow
+        </span>
+<!-- Main Title / Action text -->
+<h2 class="text-2xl md:text-[26px] font-bold text-[#18191c] tracking-tight">
+          Hospital Portal
+        </h2>
+</a>
+<!-- Card 3: Admin Panel (Solid Dark Charcoal / Black) -->
+<a aria-label="Enter Admin Panel portal" class="neo-card flex flex-col items-center justify-center w-full max-w-[280px] sm:max-w-none aspect-square bg-[#101114] border-2 border-[#18191c] rounded-[36px] p-6 text-center cursor-pointer select-none text-white" href="#" role="button">
+<!-- Converging Inward Arrows Icon matching reference -->
+<div aria-hidden="true" class="mb-5 text-white">
+<svg class="w-9 h-9 stroke-[3.2] stroke-current fill-none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+<line x1="4" x2="10" y1="12" y2="12"></line>
+<polyline points="7 9 10 12 7 15"></polyline>
+<line x1="20" x2="14" y1="12" y2="12"></line>
+<polyline points="17 9 14 12 17 15"></polyline>
+</svg>
+</div>
+<!-- Card Label -->
+<span class="text-sm md:text-base font-medium text-neutral-300 tracking-normal mb-1">
+          Net Changes
+        </span>
+<!-- Main Title / Action text -->
+<h2 class="text-2xl md:text-[26px] font-bold text-white tracking-tight">
+          Admin Panel
+        </h2>
+</a>
+</div>
+<!-- END: CardsGrid -->
+</main>
+<!-- END: MainContent -->
+
+
+</body></html>
