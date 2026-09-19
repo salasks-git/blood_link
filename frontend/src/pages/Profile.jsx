@@ -203,12 +203,12 @@ const Profile = () => {
                         <>
                           <span className="font-body-md font-medium text-on-surface">{placeName}</span>
                           <span className="font-body-xs text-on-surface-variant mt-0.5">
-                            Lat: {profile.location.latitude.toFixed(4)}, Lng: {profile.location.longitude.toFixed(4)}
+                            Lat: {parseFloat(profile.location.latitude).toFixed(4)}, Lng: {parseFloat(profile.location.longitude).toFixed(4)}
                           </span>
                         </>
                       ) : (
                         <span className="font-body-md text-on-surface-variant">
-                          Lat: {profile.location.latitude.toFixed(4)}, Lng: {profile.location.longitude.toFixed(4)}
+                          Lat: {parseFloat(profile.location.latitude).toFixed(4)}, Lng: {parseFloat(profile.location.longitude).toFixed(4)}
                         </span>
                       )}
                     </div>
