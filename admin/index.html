@@ -714,20 +714,34 @@
     // OVERVIEW
     async function loadOverview() {
       try {
-        const [rRes, dRes] = await Promise.all([fetch(API + '/admin/requests'), fetch(API + '/donors')]);
+        const [rRes, dRes, uRes] = await Promise.all([
+          fetch(API + '/admin/requests'), 
+          fetch(API + '/donors'),
+          fetch(API + '/admin/users')
+        ]);
         const requests = rRes.ok ? await rRes.json() : [];
         const donorsRaw = dRes.ok ? await dRes.json() : [];
-
-        // Deduplicate donors by userid to show unique users
-        const donorsMap = new Map();
-        donorsRaw.forEach(d => donorsMap.set(d.userId || d.userid, d));
-        const donors = Array.from(donorsMap.values());
+        const usersRaw = uRes.ok ? await uRes.json() : [];
 
         document.getElementById('stat-total-requests').textContent = requests.length;
-        document.getElementById('stat-donors').textContent = donors.length;
-        const uids = new Set([...requests.map(r => r.userId || r.userid), ...donors.map(d => d.userId || d.userid)]);
-        document.getElementById('stat-users').textContent = uids.size;
-        const bg = {}; donors.forEach(d => {
+        document.getElementById('stat-users').textContent = usersRaw.length;
+
+        // Filter active donors using DB role
+        const activeDonors = usersRaw.filter(u => (u.role || '').toLowerCase() === 'donor');
+        document.getElementById('stat-donors').textContent = activeDonors.length;
+
+        // Deduplicate donor profiles and only keep active donors for blood group stats
+        const activeDonorIds = new Set(activeDonors.map(u => u.id));
+        const donorsMap = new Map();
+        donorsRaw.forEach(d => {
+          if (activeDonorIds.has(d.userId || d.userid)) {
+            donorsMap.set(d.userId || d.userid, d);
+          }
+        });
+        const activeDonorProfiles = Array.from(donorsMap.values());
+
+        const bg = {}; 
+        activeDonorProfiles.forEach(d => {
           const group = d.bloodgroup || d.bloodGroup || 'Unknown';
           bg[group] = (bg[group] || 0) + 1;
         });
