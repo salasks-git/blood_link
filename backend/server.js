@@ -219,14 +219,29 @@ app.patch('/api/users/:id/role', (req, res) => {
 // Create Donor
 app.post('/api/donors', (req, res) => {
     const { userId, bloodGroup, radius, available } = req.body;
-    db.run(
-        `INSERT INTO donors (userId, bloodGroup, radius, available) VALUES (?, ?, ?, ?)`,
-        [userId, bloodGroup, radius, available],
-        function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id: this.lastID, userId, bloodGroup, radius, available });
+    db.get(`SELECT id FROM donors WHERE userId = ?`, [userId], (err, existing) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        if (existing) {
+            db.run(
+                `UPDATE donors SET bloodGroup = ?, radius = ?, available = ? WHERE userId = ?`,
+                [bloodGroup, radius, available, userId],
+                function (err) {
+                    if (err) return res.status(500).json({ error: err.message });
+                    res.json({ id: existing.id, userId, bloodGroup, radius, available });
+                }
+            );
+        } else {
+            db.run(
+                `INSERT INTO donors (userId, bloodGroup, radius, available) VALUES (?, ?, ?, ?)`,
+                [userId, bloodGroup, radius, available],
+                function (err) {
+                    if (err) return res.status(500).json({ error: err.message });
+                    res.json({ id: this.lastID, userId, bloodGroup, radius, available });
+                }
+            );
         }
-    );
+    });
 });
 
 // Get Donors (optionally filter by bloodGroup)

@@ -432,10 +432,16 @@ async function loadOverview(){
   try{
     const[rRes,dRes]=await Promise.all([fetch(API+'/requests'),fetch(API+'/donors')]);
     const requests=rRes.ok?await rRes.json():[];
-    const donors=dRes.ok?await dRes.json():[];
+    const donorsRaw=dRes.ok?await dRes.json():[];
+    
+    // Deduplicate donors to show unique users
+    const donorsMap = new Map();
+    donorsRaw.forEach(d => donorsMap.set(d.userId || d.userid, d));
+    const donors = Array.from(donorsMap.values());
+
     document.getElementById('stat-total-requests').textContent=requests.length;
     document.getElementById('stat-donors').textContent=donors.length;
-    const uids=new Set([...requests.map(r=>r.userId),...donors.map(d=>d.userId)]);
+    const uids=new Set([...requests.map(r=>r.userId || r.userid),...donors.map(d=>d.userId || d.userid)]);
     document.getElementById('stat-users').textContent=uids.size;
     const bg={};donors.forEach(d=>{
       const group = d.bloodGroup || d.bloodgroup || 'Unknown';
