@@ -23,6 +23,7 @@ const RoleSelection = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role })
       });
+      localStorage.setItem('userRole', role);
     } catch (err) {
       console.error('Failed to update role:', err);
     }

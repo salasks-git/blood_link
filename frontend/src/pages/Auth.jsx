@@ -50,6 +50,7 @@ const Auth = () => {
         const userId = data.id;
         const userRole = data.role || 'user';
         localStorage.setItem('userId', userId);
+        localStorage.setItem('userRole', userRole);
 
         setLoading(false);
         if (userRole === 'donor') {

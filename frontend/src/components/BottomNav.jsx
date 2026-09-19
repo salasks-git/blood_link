@@ -8,7 +8,9 @@ const BottomNav = () => {
 
   // Only show on these three specific routes
   const validRoutes = ['/donor-home', '/incoming-request', '/profile'];
-  if (!validRoutes.includes(path)) {
+  const userRole = localStorage.getItem('userRole');
+
+  if (!validRoutes.includes(path) || userRole === 'receiver') {
     return null;
   }
 

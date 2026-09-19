@@ -245,6 +245,7 @@ const Profile = () => {
                 className="w-full h-12 flex items-center justify-center rounded-full border border-error text-error font-label-lg text-label-lg tracking-wide hover:bg-error/10 active:scale-[0.99] transition-all"
                 onClick={() => {
                   localStorage.removeItem('userId');
+                  localStorage.removeItem('userRole');
                   navigate('/');
                 }}
               >
