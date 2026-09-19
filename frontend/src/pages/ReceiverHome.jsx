@@ -155,8 +155,6 @@ const ReceiverHome = () => {
 
         </div>
       </main>
-
-      <ReceiverBottomNav />
     </div>
   );
 };
