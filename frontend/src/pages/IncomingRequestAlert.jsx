@@ -30,10 +30,19 @@ const IncomingRequestAlert = () => {
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         setBloodGroup(data.bloodGroup);
-        setRequests(data.requests || []);
-        const states = {};
-        (data.requests || []).forEach(r => { states[r.id] = 'idle'; });
-        setActionState(states);
+        setRequests(prev => {
+          // Merge new requests without resetting action states of already-seen ones
+          const newIds = new Set((data.requests || []).map(r => r.id));
+          // Remove requests no longer open, keep action state for ones already acted on
+          return data.requests || [];
+        });
+        setActionState(prev => {
+          const states = { ...prev };
+          (data.requests || []).forEach(r => {
+            if (!states[r.id]) states[r.id] = 'idle';
+          });
+          return states;
+        });
       } catch (e) {
         setError('Could not load requests. Please try again.');
       } finally {
@@ -41,6 +50,9 @@ const IncomingRequestAlert = () => {
       }
     };
     fetch_();
+    // Poll every 30 seconds for new incoming requests
+    const interval = setInterval(fetch_, 30000);
+    return () => clearInterval(interval);
   }, [userId, navigate]);
 
   const handleAcceptClick = (req) => {
@@ -53,10 +65,11 @@ const IncomingRequestAlert = () => {
     setConsentReq(null);
     setActionState(s => ({ ...s, [req.id]: 'accepting' }));
     try {
+      // 'found' is the correct status when a donor accepts a request
       await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/requests/${req.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'accepted', donorId: userId }),
+        body: JSON.stringify({ status: 'found', donorId: parseInt(userId, 10) }),
       });
       setActionState(s => ({ ...s, [req.id]: 'accepted' }));
     } catch {
@@ -72,9 +85,17 @@ const IncomingRequestAlert = () => {
   };
 
   const urgencyLabel = (u) => {
-    if (u === 'immediate') return 'Emergency / Immediate';
-    if (u === '24h') return 'Within 24 Hours';
-    return 'Scheduled';
+    if (!u) return 'Standard';
+    const val = u.toLowerCase();
+    if (val === 'immediate' || val === 'stat' || val === 'emergency') return 'Emergency / Immediate';
+    if (val === 'urgent' || val === '24h' || val === 'medium') return 'Within 24 Hours';
+    if (val === 'routine' || val === 'scheduled') return 'Scheduled';
+    return u; // fallback: show raw value
+  };
+
+  const isEmergencyUrgency = (u) => {
+    const val = (u || '').toLowerCase();
+    return val === 'immediate' || val === 'stat' || val === 'emergency';
   };
 
   if (loading) {
@@ -157,7 +178,7 @@ const IncomingRequestAlert = () => {
           <div className="flex flex-col gap-space-md">
             {requests.map((req) => {
               const status = actionState[req.id] || 'idle';
-              const isUrgent = req.urgency === 'immediate';
+              const isUrgent = isEmergencyUrgency(req.urgency);
               return (
                 <div key={req.id} className="w-full bg-surface-container-lowest rounded-2xl shadow-sm p-space-lg flex flex-col items-center text-center relative overflow-hidden">
 
@@ -169,7 +190,7 @@ const IncomingRequestAlert = () => {
                   {/* Blood type pill */}
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-on-primary rounded-full mb-space-sm shadow-sm">
                     <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>bloodtype</span>
-                    <span className="font-label-lg text-label-lg font-bold tracking-tight">{req.bloodGroup} Positive</span>
+                    <span className="font-label-lg text-label-lg font-bold tracking-tight">{req.bloodGroup}</span>
                   </div>
 
                   {/* Headline */}
@@ -197,7 +218,7 @@ const IncomingRequestAlert = () => {
                         </p>
                       </div>
                     </div>
-                    {isUrgent && (
+                    {isEmergencyUrgency(req.urgency) && (
                       <div className="mt-space-sm pt-space-sm flex items-center justify-end text-on-surface-variant font-label-md text-label-md">
                         <span className="font-semibold text-primary">High Priority</span>
                       </div>

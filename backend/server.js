@@ -287,7 +287,7 @@ app.get('/api/donors', (req, res) => {
 // Get open requests matching a donor's blood group
 app.get('/api/requests/for-donor/:userId', (req, res) => {
     const { userId } = req.params;
-    db.get(`SELECT bloodGroup, radius FROM donors WHERE userId = ?`, [userId], (err, donor) => {
+    db.get(`SELECT bloodGroup, radius, available FROM donors WHERE userId = ? AND available = true`, [userId], (err, donor) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!donor) return res.json({ bloodGroup: null, requests: [] });
 
