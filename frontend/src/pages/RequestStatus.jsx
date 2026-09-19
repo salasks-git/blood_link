@@ -50,9 +50,9 @@ const RequestStatus = () => {
     },
     {
       id: 3,
-      label: request?.status === 'accepted' ? 'Donor Found & Confirmed' : 'Waiting for Donor',
-      sub: request?.status === 'accepted' ? 'In transit to hospital' : 'Searching active network...',
-      status: request?.status === 'accepted' ? 'active' : 'upcoming',
+      label: (request?.status === 'accepted' || request?.status === 'found') ? 'Donor Found & Confirmed' : 'Waiting for Donor',
+      sub: (request?.status === 'accepted' || request?.status === 'found') ? 'In transit to hospital' : 'Searching active network...',
+      status: (request?.status === 'accepted' || request?.status === 'found') ? 'active' : 'upcoming',
     },
     {
       id: 4,
@@ -108,7 +108,7 @@ const RequestStatus = () => {
           </div>
 
           {/* Status Banner */}
-          {request?.status === 'accepted' ? (
+          {(request?.status === 'accepted' || request?.status === 'found') ? (
             <section className="bg-surface-container-low rounded-lg p-space-md mb-space-lg shadow-sm border border-emerald-500/20">
               <div className="flex items-start gap-space-md">
                 <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm">
@@ -198,7 +198,7 @@ const RequestStatus = () => {
           </section>
 
           {/* Actions (Only unlocked when donor accepts) */}
-          {request?.status === 'accepted' ? (
+          {(request?.status === 'accepted' || request?.status === 'found') ? (
             <div className="flex flex-col gap-space-sm mb-space-lg">
               <a
                 className="w-full h-12 rounded-full bg-emerald-600 text-white font-label-lg text-label-lg flex items-center justify-center gap-space-xs shadow-md active:bg-emerald-700 transition-colors"
