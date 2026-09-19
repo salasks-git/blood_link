@@ -224,28 +224,36 @@ const RequestStatus = () => {
         </div>
       </main>
 
-      {/* Bottom Nav */}
-      <nav aria-label="Bottom Navigation" className="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-safe">
-        <div className="max-w-[440px] mx-auto px-space-md h-16 flex items-center justify-around">
-          <button className="flex flex-col items-center justify-center flex-1 py-1 text-on-surface-variant hover:text-on-surface transition-colors" onClick={() => navigate('/donor-home')}>
-            <span className="material-symbols-outlined text-[22px]">home</span>
-            <span className="font-label-sm text-label-sm mt-0.5">Home</span>
-          </button>
-          <button className="flex flex-col items-center justify-center flex-1 py-1 text-primary relative">
-            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>assignment</span>
-            <span className="font-label-sm text-label-sm mt-0.5 font-bold">Requests</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-primary mt-0.5" />
-          </button>
-          <button className="flex flex-col items-center justify-center flex-1 py-1 text-on-surface-variant hover:text-on-surface transition-colors">
-            <span className="material-symbols-outlined text-[22px]">diversity_1</span>
-            <span className="font-label-sm text-label-sm mt-0.5">Donors</span>
-          </button>
-          <button className="flex flex-col items-center justify-center flex-1 py-1 text-on-surface-variant hover:text-on-surface transition-colors">
-            <span className="material-symbols-outlined text-[22px]">settings</span>
-            <span className="font-label-sm text-label-sm mt-0.5">Profile</span>
-          </button>
-        </div>
-      </nav>
+      {/* Bottom Nav — role-aware */}
+      {(() => {
+        const activeRole = localStorage.getItem('activeRole');
+        const homeRoute = activeRole === 'receiver' ? '/receiver-home' : '/donor-home';
+        const requestsRoute = activeRole === 'receiver' ? '/receiver-requests' : '/incoming-request';
+        const navColor = activeRole === 'receiver' ? 'text-tertiary' : 'text-primary';
+        return (
+          <nav aria-label="Bottom Navigation" className="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-safe">
+            <div className="max-w-[440px] mx-auto px-space-md h-16 flex items-center justify-around">
+              <button className="flex flex-col items-center justify-center flex-1 py-1 text-on-surface-variant hover:text-on-surface transition-colors" onClick={() => navigate(homeRoute)}>
+                <span className="material-symbols-outlined text-[22px]">home</span>
+                <span className="font-label-sm text-label-sm mt-0.5">Home</span>
+              </button>
+              <button className={`flex flex-col items-center justify-center flex-1 py-1 relative ${navColor}`}>
+                <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>assignment</span>
+                <span className="font-label-sm text-label-sm mt-0.5 font-bold">Status</span>
+                <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${activeRole === 'receiver' ? 'bg-tertiary' : 'bg-primary'}`} />
+              </button>
+              <button className="flex flex-col items-center justify-center flex-1 py-1 text-on-surface-variant hover:text-on-surface transition-colors" onClick={() => navigate(requestsRoute)}>
+                <span className="material-symbols-outlined text-[22px]">list_alt</span>
+                <span className="font-label-sm text-label-sm mt-0.5">All Requests</span>
+              </button>
+              <button className="flex flex-col items-center justify-center flex-1 py-1 text-on-surface-variant hover:text-on-surface transition-colors" onClick={() => navigate('/profile')}>
+                <span className="material-symbols-outlined text-[22px]">account_circle</span>
+                <span className="font-label-sm text-label-sm mt-0.5">Profile</span>
+              </button>
+            </div>
+          </nav>
+        );
+      })()}
     </div>
   );
 };
