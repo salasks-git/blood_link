@@ -172,16 +172,18 @@ const Profile = () => {
                 </div>
               </div>
 
-              {profile.role === 'donor' && profile.donorInfo?.bloodGroup && (
+              {profile.role === 'donor' && (
                 <div className="flex flex-col gap-space-sm mb-space-md opacity-70">
                   <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
                     Blood Group (Cannot be changed)
                   </label>
                   <div className="flex items-center w-full h-12 px-space-md rounded-full bg-surface-container-lowest shadow-sm border border-transparent">
                     <div className="flex items-center gap-2 w-full">
-                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">lock</span>
+                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
+                        {profile.donorInfo?.bloodGroup ? 'lock' : 'info'}
+                      </span>
                       <span className="font-body-lg text-body-lg text-on-surface">
-                        {profile.donorInfo.bloodGroup}
+                        {profile.donorInfo?.bloodGroup || 'Not Set'}
                       </span>
                     </div>
                   </div>
