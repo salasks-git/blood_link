@@ -663,7 +663,7 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
         db.get(reqQuery, reqArgs, (err, reqResult) => {
             if (err) return res.status(500).json({ error: err.message });
             
-            let donQuery = `SELECT donors.bloodGroup, 
+            let donQuery = `SELECT donors.userId, donors.id, donors.bloodGroup, 
                                 (SELECT latitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lat,
                                 (SELECT longitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lon
                             FROM donors WHERE available = true`;
@@ -686,8 +686,20 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
                     });
                 }
                 
-                let totalDonors = filteredDonors.length;
-                let criticalReserveUnits = filteredDonors.filter(d => {
+                // Deduplicate logic just like DonorRecords.jsx
+                const donorsMap = new Map();
+                filteredDonors.forEach(d => {
+                    const uid = d.userid || d.userId;
+                    if (uid) {
+                        donorsMap.set(uid, d);
+                    } else {
+                        donorsMap.set('manual_' + d.id, d);
+                    }
+                });
+                const uniqueDonors = Array.from(donorsMap.values());
+                
+                let totalDonors = uniqueDonors.length;
+                let criticalReserveUnits = uniqueDonors.filter(d => {
                     const bg = d.bloodgroup || d.bloodGroup;
                     return bg === 'O-' || bg === 'O Negative';
                 }).length;
