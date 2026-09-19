@@ -171,8 +171,8 @@ const CreateRequest = () => {
                   <button
                     key={bg}
                     className={`py-2.5 rounded-DEFAULT font-title-md text-title-md transition-all text-center ${selectedBlood === bg
-                        ? 'bg-primary text-on-primary font-bold shadow-sm'
-                        : 'bg-surface-container text-on-surface'
+                      ? 'bg-primary text-on-primary font-bold shadow-sm'
+                      : 'bg-surface-container text-on-surface'
                       }`}
                     onClick={() => setSelectedBlood(bg)}
                     type="button"
@@ -194,10 +194,10 @@ const CreateRequest = () => {
                     <button
                       key={opt.id}
                       className={`flex items-center justify-between p-3.5 rounded-DEFAULT cursor-pointer transition-all ${isSelected
-                          ? isImmediate
-                            ? 'bg-primary-fixed text-on-primary-fixed'
-                            : 'bg-surface-container-highest text-on-surface'
-                          : 'bg-surface-container text-on-surface'
+                        ? isImmediate
+                          ? 'bg-primary-fixed text-on-primary-fixed'
+                          : 'bg-surface-container-highest text-on-surface'
+                        : 'bg-surface-container text-on-surface'
                         }`}
                       onClick={() => setUrgency(opt.id)}
                       type="button"

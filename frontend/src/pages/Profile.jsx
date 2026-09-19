@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const Profile = () => {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
+  const activeRole = localStorage.getItem('activeRole') || 'user';
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -13,7 +14,6 @@ const Profile = () => {
   const [profile, setProfile] = useState({
     name: '',
     phone: '',
-    role: '',
     location: null,
     donorInfo: null
   });
@@ -32,7 +32,6 @@ const Profile = () => {
           setProfile({
             name: data.name || '',
             phone: data.phone || '',
-            role: data.role || '',
             location: data.location || null,
             donorInfo: data.donorInfo || null
           });
@@ -73,16 +72,15 @@ const Profile = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: profile.name,
-          role: profile.role,
           location: profile.location,
           donorInfo: profile.donorInfo
         })
       });
       if (res.ok) {
-        // Navigate to the correct dashboard based on the updated role
-        if (profile.role === 'donor') {
+        // Navigate to the correct dashboard based on localStorage activeRole
+        if (activeRole === 'donor') {
           navigate('/donor-home');
-        } else if (profile.role === 'receiver') {
+        } else if (activeRole === 'receiver') {
           navigate('/receiver-home');
         } else {
           navigate('/role-selection');
@@ -95,6 +93,12 @@ const Profile = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('activeRole');
+    navigate('/');
   };
 
   if (loading) {
@@ -122,6 +126,29 @@ const Profile = () => {
             </button>
             <span className="font-title-md text-title-md text-on-surface">My Profile</span>
             <div className="w-10" />
+          </div>
+
+          {/* Active Role Status Badge */}
+          <div className="flex items-center gap-space-sm mb-space-lg p-space-md rounded-2xl bg-surface-container-lowest border border-surface-container-high shadow-sm">
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${activeRole === 'donor' ? 'bg-primary/10 text-primary' : 'bg-tertiary/10 text-tertiary'}`}>
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                {activeRole === 'donor' ? 'favorite' : 'emergency'}
+              </span>
+            </div>
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Current Status</span>
+              <span className={`font-title-sm text-title-sm font-bold capitalize ${activeRole === 'donor' ? 'text-primary' : 'text-tertiary'}`}>
+                Active as {activeRole === 'donor' ? 'Donor' : activeRole === 'receiver' ? 'Receiver' : 'User'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/role-selection')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors text-[12px] font-semibold shrink-0"
+            >
+              <span className="material-symbols-outlined text-[14px]">swap_horiz</span>
+              Switch
+            </button>
           </div>
 
           {error ? (
@@ -156,34 +183,16 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-space-sm mb-space-md">
-                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-                  Current Role
-                </label>
-                <div className="flex items-center w-full h-12 px-space-md rounded-full bg-surface-container-lowest shadow-sm border border-transparent focus-within:border-primary/50 transition-colors">
-                  <select
-                    className="w-full bg-transparent font-body-lg text-body-lg text-on-surface focus:outline-none appearance-none"
-                    value={profile.role}
-                    onChange={e => setProfile({ ...profile, role: e.target.value })}
-                  >
-                    <option value="donor">Donor</option>
-                    <option value="receiver">Receiver</option>
-                  </select>
-                </div>
-              </div>
-
-              {profile.role === 'donor' && (
+              {activeRole === 'donor' && profile.donorInfo?.bloodGroup && (
                 <div className="flex flex-col gap-space-sm mb-space-md opacity-70">
                   <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
                     Blood Group (Cannot be changed)
                   </label>
                   <div className="flex items-center w-full h-12 px-space-md rounded-full bg-surface-container-lowest shadow-sm border border-transparent">
                     <div className="flex items-center gap-2 w-full">
-                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
-                        {profile.donorInfo?.bloodGroup ? 'lock' : 'info'}
-                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-on-surface-variant">lock</span>
                       <span className="font-body-lg text-body-lg text-on-surface">
-                        {profile.donorInfo?.bloodGroup || 'Not Set'}
+                        {profile.donorInfo.bloodGroup}
                       </span>
                     </div>
                   </div>
@@ -221,12 +230,8 @@ const Profile = () => {
                   onClick={() => navigate('/donor-location')}
                   className="flex items-center justify-center gap-2 w-full h-12 px-space-md rounded-full border border-surface-container-highest bg-transparent text-on-surface hover:bg-surface-container transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[20px]">
-                    my_location
-                  </span>
-                  <span className="font-label-lg text-label-lg">
-                    Update Location
-                  </span>
+                  <span className="material-symbols-outlined text-[20px]">my_location</span>
+                  <span className="font-label-lg text-label-lg">Update Location</span>
                 </button>
               </div>
 
@@ -243,11 +248,7 @@ const Profile = () => {
               <button
                 type="button"
                 className="w-full h-12 flex items-center justify-center rounded-full border border-error text-error font-label-lg text-label-lg tracking-wide hover:bg-error/10 active:scale-[0.99] transition-all"
-                onClick={() => {
-                  localStorage.removeItem('userId');
-                  localStorage.removeItem('userRole');
-                  navigate('/');
-                }}
+                onClick={handleLogout}
               >
                 Log Out
               </button>

@@ -10,6 +10,7 @@ import RequestStatus from './pages/RequestStatus';
 import CreateRequest from './pages/CreateRequest';
 import Profile from './pages/Profile';
 import ReceiverHome from './pages/ReceiverHome';
+import ReceiverRequests from './pages/ReceiverRequests';
 import BottomNav from './components/BottomNav';
 
 // ─── USER PORTAL (Donors & Receivers) ───────────────────────────────────────
@@ -27,6 +28,7 @@ function App() {
         <Route path="/donor-location" element={<DonorLocation />} />
         <Route path="/donor-home" element={<DonorHome />} />
         <Route path="/receiver-home" element={<ReceiverHome />} />
+        <Route path="/receiver-requests" element={<ReceiverRequests />} />
         <Route path="/incoming-request" element={<IncomingRequestAlert />} />
         <Route path="/request-status" element={<RequestStatus />} />
         <Route path="/create-request" element={<CreateRequest />} />

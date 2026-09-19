@@ -8,7 +8,7 @@ const RoleSelection = () => {
 
   const handleSelect = async (role) => {
     setPressed(role);
-    
+
     // Wait for animation
     await new Promise(r => setTimeout(r, 200));
 
@@ -17,21 +17,13 @@ const RoleSelection = () => {
       return;
     }
 
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role })
-      });
-      localStorage.setItem('userRole', role);
-    } catch (err) {
-      console.error('Failed to update role:', err);
-    }
+    // Save active role to localStorage ONLY — no DB write for role switching
+    localStorage.setItem('activeRole', role);
 
     if (role === 'receiver') {
       navigate('/receiver-home');
     } else {
-      // Check if user is already a donor
+      // Check if user is already a donor (has blood group registered)
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users/${userId}`);
         if (res.ok) {
@@ -62,6 +54,7 @@ const RoleSelection = () => {
                 className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container active:bg-surface-container-high transition-colors"
                 onClick={() => {
                   localStorage.removeItem('userId');
+                  localStorage.removeItem('activeRole');
                   navigate('/login');
                 }}
               >

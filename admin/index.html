@@ -170,7 +170,7 @@
             <div class="stat-card bg-surface-container-lowest border border-surface-container-high rounded-DEFAULT p-space-lg flex flex-col justify-between">
               <div class="flex items-center justify-between pb-space-sm"><span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Total Users</span><span class="material-symbols-outlined text-secondary text-[18px]">group</span></div>
               <div class="my-space-xs flex items-baseline gap-space-sm"><span class="font-headline-xl text-headline-xl text-on-surface font-semibold" id="stat-users">-</span><span class="font-label-sm text-label-sm text-tertiary font-medium">Total</span></div>
-              <div class="pt-space-xs border-t border-surface-container-high/60"><span class="font-body-sm text-body-sm text-secondary">Donors + Receivers</span></div>
+              <div class="pt-space-xs border-t border-surface-container-high/60"><span class="font-body-sm text-body-sm text-secondary">Registered Users</span></div>
             </div>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter-desktop items-start">
@@ -471,31 +471,44 @@ async function loadOverview(){
 }
 
 // USERS
+// Since DB role is always 'user', we derive donor/receiver status from
+// the donors table (registered donors) and requests table (receivers who made requests)
 async function loadUsers(){
   try{
-    // Use /api/admin/users for proper user list, supplement with donors for bloodgroup
-    const[uRes,dRes]=await Promise.all([fetch(API+'/admin/users'),fetch(API+'/donors')]);
+    const[uRes,dRes,rRes]=await Promise.all([
+      fetch(API+'/admin/users'),
+      fetch(API+'/donors'),
+      fetch(API+'/admin/requests')
+    ]);
     const usersRaw=uRes.ok?await uRes.json():[];
     const donorsRaw=dRes.ok?await dRes.json():[];
+    const requestsRaw=rRes.ok?await rRes.json():[];
     
-    // Build donor lookup by userid
+    // Build donor lookup by userid (has donor registration = is a donor)
     const donorLookup={};
-    donorsRaw.forEach(d=>{ donorLookup[d.userid]=d; });
+    donorsRaw.forEach(d=>{ donorLookup[String(d.userid)]=d; });
+    
+    // Build receiver lookup by userId (has blood request = has acted as receiver)
+    const receiverLookup={};
+    requestsRaw.forEach(r=>{ receiverLookup[String(r.userid || r.userId)]=true; });
     
     allUsers=usersRaw.map(u=>{
-      const donor=donorLookup[u.id];
+      const donor=donorLookup[String(u.id)];
+      const isReceiver=receiverLookup[String(u.id)];
+      // Derived display role: if registered as donor, show Donor; if has requests, show Receiver; else User
+      const derivedRole = donor ? 'donor' : isReceiver ? 'receiver' : 'user';
       return {
         id: u.id,
         name: u.name,
         phone: u.phone,
-        role: u.role || 'user',
+        derivedRole,
         bloodGroup: donor ? (donor.bloodgroup || donor.bloodGroup || '-') : '-',
         createdAt: u.createdat || u.createdAt
       };
     });
     document.getElementById('users-total').textContent=allUsers.length;
-    document.getElementById('users-donors').textContent=allUsers.filter(u=>u.role==='donor').length;
-    document.getElementById('users-receivers').textContent=allUsers.filter(u=>u.role==='receiver').length;
+    document.getElementById('users-donors').textContent=allUsers.filter(u=>u.derivedRole==='donor').length;
+    document.getElementById('users-receivers').textContent=allUsers.filter(u=>u.derivedRole==='receiver').length;
     renderUsers();
   }catch(e){
     document.getElementById('users-tbody').innerHTML='<tr><td colspan="5" class="py-6 px-space-md text-center text-secondary">Backend offline</td></tr>';
@@ -505,7 +518,8 @@ async function loadUsers(){
 function renderUsers(){
   const q=(document.getElementById('user-search').value||'').toLowerCase();
   const filtered=allUsers.filter(u=>{
-    const tab=userFilter==='all'||u.role===userFilter;
+    // Filter tabs use derivedRole
+    const tab=userFilter==='all'||u.derivedRole===userFilter;
     const s=!q||(u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q);
     return tab&&s;
   });
@@ -513,10 +527,16 @@ function renderUsers(){
   if(!filtered.length){document.getElementById('users-tbody').innerHTML='<tr><td colspan="5" class="py-6 px-space-md text-center text-secondary">No users found</td></tr>';return;}
   document.getElementById('users-tbody').innerHTML=filtered.map(u=>{
     const init=(u.name||'?').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+    // Role badge based on derivedRole
+    const roleBadge = u.derivedRole==='donor'
+      ? `<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-DEFAULT bg-primary/10 text-primary border border-primary/20"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Donor</span>`
+      : u.derivedRole==='receiver'
+      ? `<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-DEFAULT bg-tertiary/10 text-tertiary border border-tertiary/20"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Receiver</span>`
+      : `<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-DEFAULT bg-surface-container text-secondary border border-surface-container-high"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>User</span>`;
     return`<tr class="hover:bg-surface-container-low/60 transition-colors border-t border-surface-container-high">
       <td class="py-space-sm px-space-md"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-label-sm shrink-0">${init}</div><div class="min-w-0"><div class="font-label-md text-on-surface font-medium truncate">${u.name||'Unknown'}</div><div class="font-code-sm text-[11px] text-secondary truncate">ID: ${u.id}</div></div></div></td>
       <td class="py-space-sm px-space-md font-code-sm text-[12px] text-secondary">${u.phone||'-'}</td>
-      <td class="py-space-sm px-space-md"><span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-DEFAULT bg-surface-container text-on-surface"><span class="w-1.5 h-1.5 rounded-full ${u.role==='donor'?'bg-primary':'bg-tertiary'}"></span>${u.role.charAt(0).toUpperCase()+u.role.slice(1)}</span></td>
+      <td class="py-space-sm px-space-md">${roleBadge}</td>
       <td class="py-space-sm px-space-md font-label-sm text-label-sm">${u.bloodGroup||'-'}</td>
       <td class="py-space-sm px-space-md font-code-sm text-[12px] text-secondary">${u.createdAt?new Date(u.createdAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}):'-'}</td>
     </tr>`;

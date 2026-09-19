@@ -39,7 +39,7 @@ const DonorHome = () => {
             setAvailable(data.donorInfo.available === true || data.donorInfo.available === 1);
           }
         }
-      } catch (_) {}
+      } catch (_) { }
     };
     const fetchDonations = async () => {
       try {
@@ -57,7 +57,7 @@ const DonorHome = () => {
             }
           }
         }
-      } catch (_) {} finally {
+      } catch (_) { } finally {
         setLoading(false);
       }
     };
@@ -86,7 +86,7 @@ const DonorHome = () => {
             >
               <span className="material-symbols-outlined text-[20px]">notifications</span>
             </button>
-            <button 
+            <button
               type="button"
               onClick={() => navigate('/profile')}
               className="w-8 h-8 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all cursor-pointer"
@@ -117,53 +117,53 @@ const DonorHome = () => {
 
           {/* Availability Card */}
           <div className="w-full bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/50 p-space-md hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-space-sm">
-                  <div className={`w-3.5 h-3.5 rounded-full transition-colors duration-300 ring-4 ${available ? 'bg-tertiary ring-tertiary/20 animate-pulse' : 'bg-error ring-error/20'}`} />
-                  <div className="flex flex-col ml-1">
-                    <span className="font-title-md text-title-md text-on-surface font-bold tracking-tight">
-                      Status: {available ? 'Available' : 'Paused'}
-                    </span>
-                    <span className={`font-body-sm text-body-sm font-medium ${available ? 'text-tertiary' : 'text-on-surface-variant'}`}>
-                      {available ? 'Ready for urgent dispatched alerts' : 'Standby mode — no alerts'}
-                    </span>
-                  </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-space-sm">
+                <div className={`w-3.5 h-3.5 rounded-full transition-colors duration-300 ring-4 ${available ? 'bg-tertiary ring-tertiary/20 animate-pulse' : 'bg-error ring-error/20'}`} />
+                <div className="flex flex-col ml-1">
+                  <span className="font-title-md text-title-md text-on-surface font-bold tracking-tight">
+                    Status: {available ? 'Available' : 'Paused'}
+                  </span>
+                  <span className={`font-body-sm text-body-sm font-medium ${available ? 'text-tertiary' : 'text-on-surface-variant'}`}>
+                    {available ? 'Ready for urgent dispatched alerts' : 'Standby mode — no alerts'}
+                  </span>
                 </div>
-
-                {/* Toggle */}
-                <button
-                  aria-checked={available}
-                  aria-label="Toggle availability status"
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 shadow-inner ${available ? 'bg-tertiary' : 'bg-surface-variant'}`}
-                  onClick={toggleAvailability}
-                  role="switch"
-                >
-                  <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${available ? 'translate-x-7' : 'translate-x-1'}`} />
-                </button>
               </div>
 
-              {/* Stats Strip */}
-              <div className="grid grid-cols-2 gap-space-md mt-6 pt-5 border-t border-outline-variant/30">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[20px]">favorite</span>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-bold">Times Donated</span>
-                    <span className="text-2xl text-on-surface font-black">{pastDonations.length}</span>
-                  </div>
+              {/* Toggle */}
+              <button
+                aria-checked={available}
+                aria-label="Toggle availability status"
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 shadow-inner ${available ? 'bg-tertiary' : 'bg-surface-variant'}`}
+                onClick={toggleAvailability}
+                role="switch"
+              >
+                <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${available ? 'translate-x-7' : 'translate-x-1'}`} />
+              </button>
+            </div>
+
+            {/* Stats Strip */}
+            <div className="grid grid-cols-2 gap-space-md mt-6 pt-5 border-t border-outline-variant/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <span className="material-symbols-outlined text-[20px]">favorite</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
-                    <span className="material-symbols-outlined text-[20px]">calendar_today</span>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-bold">Next Eligible</span>
-                    <span className="text-2xl text-on-surface font-black">Now</span>
-                  </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-bold">Times Donated</span>
+                  <span className="text-2xl text-on-surface font-black">{pastDonations.length}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+                  <span className="material-symbols-outlined text-[20px]">calendar_today</span>
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-bold">Next Eligible</span>
+                  <span className="text-2xl text-on-surface font-black">Now</span>
                 </div>
               </div>
             </div>
+          </div>
           {/* Section Header */}
           <div className="flex items-center justify-between pt-space-xs">
             <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">Past Donations</h3>
@@ -182,7 +182,7 @@ const DonorHome = () => {
             {!loading && pastDonations.length === 0 && (
               <div className="flex flex-col items-center justify-center py-10 gap-3 text-on-surface-variant">
                 <span className="material-symbols-outlined text-[40px] text-outline">bloodtype</span>
-                <p className="font-body-md text-body-md text-center">No completed donations yet.<br/>Accept a request to get started!</p>
+                <p className="font-body-md text-body-md text-center">No completed donations yet.<br />Accept a request to get started!</p>
               </div>
             )}
             {!loading && pastDonations.map(d => (

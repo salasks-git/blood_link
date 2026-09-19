@@ -24,18 +24,18 @@ const Auth = () => {
       setError('Please enter an exact 10-digit mobile number');
       return;
     }
-    
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
-      const payload = isLogin 
+      const payload = isLogin
         ? { phone: cleanedPhone, password }
         : { phone: cleanedPhone, name: trimmedName, password, role: 'user' };
 
@@ -44,20 +44,21 @@ const Auth = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      
-        if (response.ok) {
+
+      if (response.ok) {
         const data = await response.json();
-        const userId = data.id;
-        const userRole = data.role || 'user';
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('userRole', userRole);
+        localStorage.setItem('userId', data.id);
 
         setLoading(false);
-        if (userRole === 'donor') {
+
+        // Route based on localStorage activeRole (set by RoleSelection)
+        const activeRole = localStorage.getItem('activeRole');
+        if (activeRole === 'donor') {
           navigate('/donor-home');
-        } else if (userRole === 'receiver') {
+        } else if (activeRole === 'receiver') {
           navigate('/receiver-home');
         } else {
+          // No active role set yet — pick a role
           navigate('/role-selection');
         }
       } else {
@@ -97,14 +98,14 @@ const Auth = () => {
 
           {/* Tabs for Login / Signup */}
           <div className="flex w-full bg-surface-container-low rounded-full p-1 mb-space-xl shadow-inner border border-surface-variant">
-            <button 
+            <button
               type="button"
               className={`flex-1 py-2.5 text-center font-label-lg text-label-lg rounded-full transition-all ${isLogin ? 'bg-surface shadow-sm text-on-surface font-bold' : 'text-on-surface-variant hover:text-on-surface'}`}
               onClick={() => { setIsLogin(true); setError(null); }}
             >
               Sign In
             </button>
-            <button 
+            <button
               type="button"
               className={`flex-1 py-2.5 text-center font-label-lg text-label-lg rounded-full transition-all ${!isLogin ? 'bg-surface shadow-sm text-on-surface font-bold' : 'text-on-surface-variant hover:text-on-surface'}`}
               onClick={() => { setIsLogin(false); setError(null); }}
