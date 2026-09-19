@@ -275,7 +275,7 @@ app.get('/api/donors', (req, res) => {
     let query = `SELECT donors.*, users.name, users.phone FROM donors JOIN users ON donors.userId = users.id`;
     let params = [];
     if (bloodGroup) {
-        query += ` WHERE donors.bloodGroup = ? AND donors.available = true`;
+        query += ` WHERE donors.bloodGroup = ? AND donors.available IN (1, '1', 'true')`;
         params.push(bloodGroup);
     }
     db.all(query, params, (err, rows) => {
@@ -287,9 +287,14 @@ app.get('/api/donors', (req, res) => {
 // Get open requests matching a donor's blood group
 app.get('/api/requests/for-donor/:userId', (req, res) => {
     const { userId } = req.params;
-    db.get(`SELECT bloodGroup, radius, available FROM donors WHERE userId = ? AND available = true`, [userId], (err, donor) => {
+    db.get(`SELECT bloodGroup, radius, available FROM donors WHERE userId = ?`, [userId], (err, donor) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!donor) return res.json({ bloodGroup: null, requests: [] });
+        
+        // If donor is unavailable, return empty list immediately
+        if (donor.available !== 1 && donor.available !== '1' && donor.available !== 'true' && donor.available !== true) {
+            return res.json({ bloodGroup: donor.bloodGroup, requests: [] });
+        }
 
         // Get donor's latest location
         db.get(`SELECT latitude, longitude FROM user_locations WHERE userId = ? ORDER BY created_at DESC LIMIT 1`, [userId], (errLoc, loc) => {
@@ -412,7 +417,7 @@ app.post('/api/requests/:id/notify-donors', (req, res) => {
                 (SELECT longitude FROM user_locations WHERE userId = donors.userId ORDER BY created_at DESC LIMIT 1) as lon
              FROM donors
              JOIN users ON donors.userId = users.id
-             WHERE donors.bloodGroup = ? AND donors.available = true`,
+             WHERE donors.bloodGroup = ? AND donors.available IN (1, '1', 'true')`,
             [request.bloodGroup],
             (err2, allDonors) => {
                 if (err2) return res.status(500).json({ error: err2.message });
