@@ -659,10 +659,9 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
         let critQuery = `SELECT COUNT(DISTINCT COALESCE(userId, id)) as criticalUnits FROM donors WHERE (bloodGroup = 'O-' OR bloodGroup = 'O Negative') AND available = true`;
         let critArgs = [];
 
-        if (staff.role !== 'system_admin' && staff.locality) {
-            reqQuery += ` AND locality = ?`; reqArgs.push(staff.locality);
-            donQuery += ` AND locality = ?`; donArgs.push(staff.locality);
-            critQuery += ` AND locality = ?`; critArgs.push(staff.locality);
+        if (staff.role !== 'system_admin') {
+            reqQuery += ` AND hospital = ?`; 
+            reqArgs.push(staff.hospitalname || staff.hospitalName);
         }
 
         db.get(reqQuery, reqArgs, (err, reqResult) => {
@@ -672,9 +671,9 @@ app.get('/api/hospital/dashboard-stats', (req, res) => {
                 db.get(critQuery, critArgs, (err, critResult) => {
                     if (err) return res.status(500).json({ error: err.message });
                     res.json({
-                        activeRequests: reqResult.activeRequests || reqResult.activerequests || 0,
-                        totalDonors: donorResult.totalDonors || donorResult.totaldonors || 0,
-                        criticalReserveUnits: critResult.criticalUnits || critResult.criticalunits || 0
+                        activeRequests: parseInt((reqResult && (reqResult.activeRequests || reqResult.activerequests)) || 0, 10),
+                        totalDonors: parseInt((donorResult && (donorResult.totalDonors || donorResult.totaldonors)) || 0, 10),
+                        criticalReserveUnits: parseInt((critResult && (critResult.criticalUnits || critResult.criticalunits)) || 0, 10)
                     });
                 });
             });
