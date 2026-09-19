@@ -29,7 +29,7 @@ const LocationMarker = ({ position, setPosition, onChange }) => {
 
 
 const SetLocationMap = ({ userId, onLocationSaved, initialLocation, onChange, onAddressChange, pickerOnly }) => {
-  const [position, setPosition] = useState(initialLocation || { lat: 40.7128, lng: -74.0060 }); // Default location
+  const [position, setPosition] = useState(initialLocation || { lat: 10.8505, lng: 76.2711 }); // Default to Kerala
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -230,7 +230,7 @@ const SetLocationMap = ({ userId, onLocationSaved, initialLocation, onChange, on
     }
   };
 
-  const center = useMemo(() => position || { lat: 40.7128, lng: -74.0060 }, [position]);
+  const center = useMemo(() => position || { lat: 10.8505, lng: 76.2711 }, [position]);
 
   return (
     <div className="bg-surface-container-lowest rounded-DEFAULT p-space-md shadow-sm flex flex-col gap-space-md">

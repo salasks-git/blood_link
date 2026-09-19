@@ -233,7 +233,7 @@ const SetLocationMap = ({ hospitalId, onLocationSaved, initialLocation, onChange
     }
   };
 
-  const center = useMemo(() => position || { lat: 40.7128, lng: -74.0060 }, [position]);
+  const center = useMemo(() => position || { lat: 10.8505, lng: 76.2711 }, [position]);
 
   return (
     <div className="bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">
